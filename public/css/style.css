@@ -1,0 +1,88 @@
+/* Global styling */
+a {
+    text-decoration: none; /* Removes the lines under links  */ 
+    margin: 20px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+[type=button] {
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+
+/* Navbar styling */
+
+.nav-items ul {
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-items input[type=text] {
+    margin-left: auto;/* Pushes the search bar to the far right */
+    padding: 5px; /* Adds padding inside the search bar */
+    border: none;
+    border-radius: 5px;  /* Rounds the corners of the search bar */
+}
+
+.nav-items {
+    background-color: #DBD475;
+    align-items: center;
+    display: flex;
+    margin-block: 10px; /* Adds space above and below the navbar */
+    padding: 10;
+}
+
+.avatar {
+    width: 40px;
+}
+
+/* Footer styling */
+
+.footer-company-info {
+    text-align: center; 
+}
+
+.footer-nav ul {
+    display: flex;
+    padding: 10;
+    margin: 0;
+}
+
+.footer-nav li {
+    margin-right: auto;
+}
+
+.footer-newsletter input[type=email] {
+    padding: 5px; /* Adds padding inside the search bar */
+    border: none;
+    border-radius: 5px;  /* Rounds the corners of the search bar */
+}
+
+.footer-newsletter h5 {
+    margin: 10px;
+}
+
+.footer-company-info,
+.footer-nav,
+.footer-social,
+.footer-newsletter {
+    flex: 1; /* Allows the items to grow and fill the available space */
+    margin: 10px;
+    text-align: center;
+}
+
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    background-color: #DBD475;
+}
