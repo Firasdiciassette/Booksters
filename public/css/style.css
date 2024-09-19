@@ -1,11 +1,45 @@
 /* Global styling */
 a {
-    text-decoration: none; /* Removes the lines under links  */ 
+    text-decoration: none; /* Removes the lines under links */ 
     margin: 20px;
 }
 
 ul {
     list-style-type: none;
+}
+
+.home-image {
+    position: relative;
+    width: 100%;  /* This makes the .home-image container span the full width of the <body>, which is essentially the width of the viewport. */
+    height: 100vh; /* This sets the height of .home-image to be 100% of the viewport height. Since <body> is the full viewport height, 
+    .home-image will also be the full viewport height. */
+    overflow: visibile;  /*  This ensures that any content (like the image) that exceeds the container's boundaries will be clipped and not visible outside the container. */
+    opacity: 70%;
+}
+
+.home-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* The image inside .home-image is styled to fill the container using width: 100%; and height: 100%;,
+    with object-fit: cover; to ensure it covers the entire area of the container, even if it means cropping. */
+}
+
+.home-image h1, .home-image h3{
+    position: absolute;
+    color: white;
+    text-align: center;
+    width: 100%;
+    margin: 0;
+}
+
+.home-image h1 {
+    top: 30%; 
+    font-size: 70px;
+}
+
+.home-image h3{
+    top: 50%; 
+    /* font-size: 50px; */
 }
 
 [type=button] {
@@ -15,9 +49,7 @@ ul {
     padding: 5px;
 }
 
-
 /* Navbar styling */
-
 .nav-items ul {
     display: flex;
     padding: 0;
@@ -25,10 +57,10 @@ ul {
 }
 
 .nav-items input[type=text] {
-    margin-left: auto;/* Pushes the search bar to the far right */
+    margin-left: auto; /* Pushes the search bar to the far right */
     padding: 5px; /* Adds padding inside the search bar */
     border: none;
-    border-radius: 5px;  /* Rounds the corners of the search bar */
+    border-radius: 5px; /* Rounds the corners of the search bar */
 }
 
 .nav-items {
@@ -36,7 +68,7 @@ ul {
     align-items: center;
     display: flex;
     margin-block: 10px; /* Adds space above and below the navbar */
-    padding: 10;
+    padding: 10px; /* Adds padding inside the navbar */
 }
 
 .avatar {
@@ -44,14 +76,13 @@ ul {
 }
 
 /* Footer styling */
-
 .footer-company-info {
     text-align: center; 
 }
 
 .footer-nav ul {
     display: flex;
-    padding: 10;
+    padding: 10px; /* Adds padding inside the footer navigation */
     margin: 0;
 }
 
@@ -60,9 +91,9 @@ ul {
 }
 
 .footer-newsletter input[type=email] {
-    padding: 5px; /* Adds padding inside the search bar */
+    padding: 5px; /* Adds padding inside the email input */
     border: none;
-    border-radius: 5px;  /* Rounds the corners of the search bar */
+    border-radius: 5px; /* Rounds the corners of the email input */
 }
 
 .footer-newsletter h5 {
@@ -78,11 +109,11 @@ ul {
     text-align: center;
 }
 
-
 footer {
     display: flex;
     justify-content: space-around;
     align-items: center;
     padding: 20px;
     background-color: #DBD475;
+    margin-block: 10px;
 }
