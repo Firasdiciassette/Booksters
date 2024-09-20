@@ -64,7 +64,7 @@ ul {
 }
 
 .nav-items {
-    background-color: #DBD475;
+    background-color: #dcdcdc;
     align-items: center;
     display: flex;
     margin-block: 10px; /* Adds space above and below the navbar */

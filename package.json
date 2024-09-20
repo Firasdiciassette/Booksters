@@ -11,11 +11,14 @@
   "author": "Firas Tabai",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.3",
     "ejs": "^3.1.10",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.5"
   }
-  
 }
