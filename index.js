@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
+const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const port = 3000;
 
@@ -22,7 +23,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const db = new sqlite3.Database('booksters.db');
+
 // Middleware
+/* Passport (not using this yet)
 passport.use(new LocalStrategy(
   function(username, password, done) {
     if (username === 'admin' && password === 'password') {
@@ -40,6 +44,7 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(id, done) {
   done(null, { id: 1, username: 'admin' });
 });
+*/
 
 // Routes definition, dynamic rendering
 

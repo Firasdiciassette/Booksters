@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', e => {
             e.preventDefault(); 
             // alert('form submit event!');
-            validateInput();
+            if(validateInput()){
+                form.submit();
+            }
             
         });
     }
