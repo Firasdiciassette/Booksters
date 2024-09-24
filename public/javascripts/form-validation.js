@@ -1,22 +1,27 @@
 "use strict";
-/* Note that unless you use a framework that takes care of this for you, 
-you’ll also need to wrap that in the DOMContentLoaded event callback, 
-so your event handler is attached to the DOM element after the DOM has been loaded 
-(otherwise it might be attached before, end it ends up failing to work): */
 document.addEventListener('DOMContentLoaded', () => {
     const username = document.getElementById('username');
     const password = document.getElementById('password');
-    const form = document.getElementById('login-form');
+    const email = document.getElementById('email');
+    const confirmPassword = document.getElementById('confirm-password');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
 
-
-    if (form) {
-        form.addEventListener('submit', e => {
-            e.preventDefault(); 
-            // alert('form submit event!');
-            if(validateInput()){
-                form.submit();
+    if (loginForm) {
+        loginForm.addEventListener('submit', e => {
+            e.preventDefault();
+            if (validateLogin()) {
+                loginForm.submit();
             }
-            
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', e => {
+            e.preventDefault();
+            if (validateRegistration()) {
+                registerForm.submit();
+            }
         });
     }
 
@@ -38,25 +43,82 @@ document.addEventListener('DOMContentLoaded', () => {
         inputControl.classList.remove('error');
     }
 
-    const validateInput = () => {
+    const validateLogin = () => {
         const usernameValue = username.value.trim();
         const passValue = password.value.trim();
+        let isValid = true;
 
         if (usernameValue === '') {
-            setError(username, "Username/Email is required.");
-        } else if (!isValidEmail(usernameValue) && !isValidUsername(usernameValue)) {
-            setError(username, "Enter a valid email or username");
+            setError(username, "Username is required.");
+            isValid = false;
+        } else if (!isValidUsername(usernameValue)) {
+            setError(username, "Enter a valid username.");
+            isValid = false;
         } else {
             setSuccess(username);
         }
 
         if (passValue === '') {
             setError(password, 'Password is required.');
+            isValid = false;
         } else if (passValue.length < 8) {
             setError(password, 'Password must be at least 8 characters.');
+            isValid = false;
         } else {
             setSuccess(password);
         }
+
+        return isValid;
+    }
+
+    const validateRegistration = () => {
+        const usernameValue = username.value.trim();
+        const emailValue = email.value.trim();
+        const passValue = password.value.trim();
+        const confirmPassValue = confirmPassword.value.trim();
+        let isValid = true;
+
+        if (usernameValue === '') {
+            setError(username, "Username is required.");
+            isValid = false;
+        } else if (!isValidUsername(usernameValue)) {
+            setError(username, "Enter a valid username.");
+            isValid = false;
+        } else {
+            setSuccess(username);
+        }
+
+        if (emailValue === '') {
+            setError(email, "Email is required.");
+            isValid = false;
+        } else if (!isValidEmail(emailValue)) {
+            setError(email, "Enter a valid email.");
+            isValid = false;
+        } else {
+            setSuccess(email);
+        }
+
+        if (passValue === '') {
+            setError(password, 'Password is required.');
+            isValid = false;
+        } else if (passValue.length < 8) {
+            setError(password, 'Password must be at least 8 characters.');
+            isValid = false;
+        } else {
+            setSuccess(password);
+        }
+
+        if (confirmPassValue === '') {
+            setError(confirmPassword, 'Please confirm your password.');
+            isValid = false;
+        } else if (confirmPassValue !== passValue) {
+            setError(confirmPassword, 'Passwords do not match.');
+            isValid = false;
+        } else {
+            setSuccess(confirmPassword);
+        }
+
+        return isValid;
     }
 
     const isValidEmail = email => {
