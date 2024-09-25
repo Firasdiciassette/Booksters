@@ -14,10 +14,10 @@
     </div>
     <div class="inner-login-box">
       <h1>Sign-up</h1>
-      <% if (error_msg) { %>
+      <% if (error_msg.length > 0) { %>
         <div class="alert alert-danger"><%= error_msg %></div>
       <% } %>
-      <% if (success_msg) { %>
+      <% if (success_msg.length > 0) { %>
         <div class="alert alert-success"><%= success_msg %></div>
       <% } %>
       <form id="register-form" action="/register" method="POST">
@@ -25,28 +25,28 @@
           <li>
             <label for="username">Enter Your Username</label>
             <div class="input-control">
-              <input type="text" id="username" name="username" size="30" required>
+              <input type="text" id="username" name="username" size="30">
               <div class="error"></div>
             </div>
           </li>
           <li>
             <label for="email">Enter Your Email</label>
             <div class="input-control">
-              <input type="email" id="email" name="email" size="30" required>
+              <input type="email" id="email" name="email" size="30">
               <div class="error"></div>
             </div>
           </li>
           <li>
             <label for="password">Enter Your Password</label>
             <div class="input-control">
-              <input type="password" id="password" name="password" size="30" required>
+              <input type="password" id="password" name="password" size="30">
               <div class="error"></div>
             </div>
           </li>
           <li>
             <label for="confirm-password">Confirm Your Password</label>
             <div class="input-control">
-              <input type="password" id="confirm-password" name="confirm-password" size="30" required>
+              <input type="password" id="confirm-password" name="confirm-password" size="30">
               <div class="error"></div>
             </div>
           </li>
@@ -58,6 +58,6 @@
       </form>
     </div>
   </div>
-  <script src="/public/javascripts/form-validation.js" defer></script>
+  <script src="/javascripts/form-validation.js" defer></script>
 </body>
 </html>

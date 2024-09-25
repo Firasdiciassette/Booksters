@@ -55,7 +55,7 @@ app.use(passport.session());
 
 // Routes definition and dynamic rendering
 app.get('/', (req, res) => {
-  res.render('index.ejs'); // Check if the extension is actually needed
+  res.render('index');
 });
 
 app.get('/login', (req, res) => {
@@ -76,32 +76,45 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const { username, email, password, confirmPassword } = req.body;
+    const { username, email, password, 'confirm-password': confirmPassword } = req.body;
+    console.log('Request body:', req.body);
 
     if (password !== confirmPassword) {
       req.flash('error_msg', 'Passwords do not match.');
-      //return res.redirect('/register'); no need for redirection
+      return res.redirect('/register');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUserByUsername = await userDAO.findUserByUsername(username);
+    if (existingUserByUsername) {
+      console.log('Existing user by username found:', existingUserByUsername);
 
-    userDAO.createUser({ username, email, password: hashedPassword })
-      .then(() => {
-        req.flash('success_msg', 'You are now registered and can log in.');
-        res.redirect('/login');
-      })
-      .catch((err) => {
-        console.error('Error registering user:', err.message);
-        req.flash('error_msg', '\nRegistration failed. Please try again.');
-        res.redirect('/register');
-      });
+      if (username === existingUserByUsername.username) {
+        req.flash('error_msg', 'Username taken.');
+        return res.redirect('/register');
+      }
+    }
+    const existingUserByEmail = await userDAO.findUserByEmail(email);
+    if (existingUserByEmail) {
+      console.log('Existing user by email found:', existingUserByEmail);
+
+      if (email === existingUserByEmail.email) {
+        req.flash('error_msg', 'Email already in use.');
+        return res.redirect('/register');
+      }
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await userDAO.createUser(username, email, hashedPassword);
+    req.flash('success_msg', 'You are now registered and can log in.');
+    res.render('registration-success', { delay: 3000 }); // Pass the delay time in milliseconds
+    //res.redirect('/login');
+
   } catch (error) {
     console.error('Registration error:', error);
+    console.error('Error stack trace:', error.stack);
     req.flash('error_msg', 'An error occurred. Please try again.');
     res.redirect('/register');
   }
 });
-
 
 
 // Server booting

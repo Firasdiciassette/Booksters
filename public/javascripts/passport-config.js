@@ -1,4 +1,3 @@
-//const userDAO = require('/dao/user-dao');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 

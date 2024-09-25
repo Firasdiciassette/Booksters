@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', e => {
             e.preventDefault();
             if (validateLogin()) {
+                console.log('Validating log in ...')
                 loginForm.submit();
             }
         });
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', e => {
             e.preventDefault();
             if (validateRegistration()) {
+                console.log('Validating sign up ...')
                 registerForm.submit();
             }
         });
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const validateLogin = () => {
+        console.log('Validating log in ...')
         const usernameValue = username.value.trim();
         const passValue = password.value.trim();
         let isValid = true;
@@ -61,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (passValue === '') {
             setError(password, 'Password is required.');
             isValid = false;
-        } else if (passValue.length < 8) {
-            setError(password, 'Password must be at least 8 characters.');
+        } else if (passValue.length < 4) {
+            setError(password, 'Password must be at least 4 (change this) characters.');
             isValid = false;
         } else {
             setSuccess(password);
@@ -72,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const validateRegistration = () => {
+        console.log('Validating sign in ...')
         const usernameValue = username.value.trim();
         const emailValue = email.value.trim();
         const passValue = password.value.trim();
@@ -101,8 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (passValue === '') {
             setError(password, 'Password is required.');
             isValid = false;
-        } else if (passValue.length < 8) {
-            setError(password, 'Password must be at least 8 characters.');
+        } else if (passValue.length < 4) {
+            setError(password, 'Password must be at least 4 (change this in the future) characters.');
             isValid = false;
         } else {
             setSuccess(password);

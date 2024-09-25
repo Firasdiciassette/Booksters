@@ -30,6 +30,16 @@ class UserDAO {
     });
   }
 
+  findUserByEmail(email){
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM users WHERE email = ?';
+      this.db.get(sql, [email], (err, row) => {
+        if(err) return reject (err);
+        resolve(row);
+      });
+    });
+  }
+
   findUserById(id) {
     return new Promise((resolve, reject) => {
       const sql = 'SELECT * FROM users WHERE id = ?';

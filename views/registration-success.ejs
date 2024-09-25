@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registration Successful | Booksters</title>
+    <script>
+      const delay = <%= delay %>;
+
+      document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+          window.location.href = '/login';
+        }, delay);
+      });
+    </script>
+</head>
+<body>
+    <div class="message-box">
+        <h1>Registration Successful!</h1>
+        <p>You will be redirected to the login page shortly...</p>
+    </div>
+</body>
+</html>
