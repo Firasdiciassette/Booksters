@@ -4,10 +4,12 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const initializePassport = require('./public/javascripts/passport-config');
 const sqlite3 = require('sqlite3').verbose();
 const UserDAO = require('./dao/user-dao');
+const SessionDAO = require ('./dao/session-dao');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const app = express();
@@ -18,6 +20,7 @@ app.set('view engine', 'ejs');
 // Serve all static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser)
 
 // Database connection to local file
 const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -29,12 +32,18 @@ const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) 
 });
 
 const userDAO = new UserDAO(db);
+const sessionDAO = new SessionDAO(db);
 
 // Middleware
 app.use(session({
+  store: new SQLiteStore({
+    db: sessionDAO.db,
+    table: 'sessions',
+  }),
   secret: 'revolution',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie : {secure: false}
 }));
 
 app.use(flash());
@@ -71,7 +80,7 @@ app.post('/login',
 );
 
 app.get('/register', (req, res) => {
-  res.render('register.ejs');
+  res.render('register');
 });
 
 app.post('/register', async (req, res) => {
