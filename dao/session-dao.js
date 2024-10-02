@@ -1,31 +1,46 @@
-const sqlite3 = require('sqlite3').verbose;
-
-class SessionDAO{
-    constructor(db){
-        this.db=db;
+class SessionDAO {
+    constructor(db) {
+        this.db = db; // Use the provsided database instance
+        console.log("Initializing SessionDAO");
         this.createTable();
     }
 
     createTable() {
         const sql = `CREATE TABLE IF NOT EXISTS sessions (
-            id TEXT PRIMARY KEY,
-            session TEXT NOT NULL,
-            expires INTEGER NOT NULL
+            sid TEXT PRIMARY KEY,
+            sess TEXT NOT NULL,
+            expired INTEGER NOT NULL
         )`;
-        this.db.run(sql);
+        this.db.run(sql, (err) => {
+            if (err) {
+                console.error("Error creating sessions table:", err.message);
+            }
+        });
     }
 
-    getSession(id, callback){
-        return new Promise((resolve, reject) => {
-            const sql = 'SELECT session FROM sessions WHERE id = ?';
-            this.db.get(sql, [id], (err, row) => {
-                if(err){
-                    return reject(err);
-                }
-                resolve(row);
-            });
+    getSession(sid, callback) {
+        const sql = `SELECT sess FROM sessions WHERE sid = ?`;
+        this.db.get(sql, [sid], (err, row) => {
+            if (err) {
+                return callback(err);
+            }
+            if (!row) {
+                return callback(null, null);
+            }
+            callback(null, JSON.parse(row.sess)); // Parse JSON string back to object
         });
+    }
+
+    saveSession(sid, sess, expired, callback) {
+        const sql = `INSERT INTO sessions (sid, sess, expired) VALUES (?, ?, ?)
+                     ON CONFLICT(sid) DO UPDATE SET sess = ?, expired = ?`;
+        this.db.run(sql, [sid, JSON.stringify(sess), expired, JSON.stringify(sess), expired], callback);
+    }
+
+    deleteSession(sid, callback) {
+        const sql = `DELETE FROM sessions WHERE sid = ?`;
+        this.db.run(sql, [sid], callback);
     }
 }
 
-module.exports = SessionDAO;
+module.exports = SessionDAO; // Ensure you're exporting the class

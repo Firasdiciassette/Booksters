@@ -8,8 +8,9 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const initializePassport = require('./public/javascripts/passport-config');
 const sqlite3 = require('sqlite3').verbose();
+const SQLiteStore = require('connect-sqlite3')(session);
 const UserDAO = require('./dao/user-dao');
-const SessionDAO = require ('./dao/session-dao');
+const SessionDAO = require('./dao/session-dao');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const app = express();
@@ -19,8 +20,10 @@ app.set('view engine', 'ejs');
 
 // Serve all static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+//Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser)
+app.use(cookieParser())
 
 // Database connection to local file
 const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -34,17 +37,26 @@ const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) 
 const userDAO = new UserDAO(db);
 const sessionDAO = new SessionDAO(db);
 
-// Middleware
+// Middleware for session management
 app.use(session({
-  store: new SQLiteStore({
-    db: sessionDAO.db,
-    table: 'sessions',
-  }),
-  secret: 'revolution',
-  resave: false,
-  saveUninitialized: false,
-  cookie : {secure: false}
+    store: new SQLiteStore({
+        db: './booksters.db',
+        table: 'sessions',
+    }),
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 60000 * 60, 
+      secure: false
+     }
 }));
+
+// Initialize Passport
+initializePassport(passport, userDAO);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(flash());
 
@@ -56,13 +68,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize Passport
-initializePassport(passport, userDAO);
+app.use((req, res, next) => {
+  if(req.session){
+    sessionDAO.saveSession(req.sessionID, req.session, Date.now() + 86400000, (err) => {
+      if(err) console.error('Error saving session', err);
+    });
+  }
+  next();
+})
 
-app.use(passport.initialize());
-app.use(passport.session());
 
-// Routes definition and dynamic rendering
+// Routes and dynamic rendering
 app.get('/', (req, res) => {
   res.render('index');
 });
@@ -82,6 +98,7 @@ app.post('/login',
 app.get('/register', (req, res) => {
   res.render('register');
 });
+
 
 app.post('/register', async (req, res) => {
   try {
@@ -115,7 +132,7 @@ app.post('/register', async (req, res) => {
     await userDAO.createUser(username, email, hashedPassword);
     req.flash('success_msg', 'You are now registered and can log in.');
     res.render('registration-success', { delay: 3000 }); // Pass the delay time in milliseconds
-    //res.redirect('/login');
+    res.redirect('/login');
 
   } catch (error) {
     console.error('Registration error:', error);
@@ -125,8 +142,30 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.get('/logout', (req, res) => {
+  req.logout((err) => {
+      if (err) {
+          console.error(err);
+          return res.redirect('/');
+      }
+      req.flash('success_msg', 'You have logged out.');
+      res.redirect('/');
+  });
+});
 
-// Server booting
+
+// Server boot
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+//Server shutting down
+process.on('SIGINT', () => {
+  db.close((err) => {
+      if (err) {
+          console.error('Error closing the database:', err.message);
+      }
+      console.log('Database closed.');
+      process.exit(0);
+  });
 });
