@@ -1,7 +1,7 @@
 class SessionDAO {
     constructor(db) {
         this.db = db; // Use the provsided database instance
-        console.log("Initializing SessionDAO");
+        //console.log("Initializing SessionDAO");
         this.createTable();
     }
 

@@ -18,12 +18,12 @@ const port = 3000;
 
 app.set('view engine', 'ejs');
 
-// Serve all static files from the "public" directory
+// static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Middleware
+//Body and cookie parser
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Database connection to local file
 const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -34,39 +34,24 @@ const db = new sqlite3.Database('./booksters.db', sqlite3.OPEN_READWRITE, (err) 
   }
 });
 
+// Session mgmt
 const userDAO = new UserDAO(db);
 const sessionDAO = new SessionDAO(db);
 
-// Middleware for session management
 app.use(session({
     store: new SQLiteStore({
         db: './booksters.db',
         table: 'sessions',
     }),
+    name: 'usersession',
     secret: 'your-secret-key',
     resave: false,
     saveUninitialized: true,
     cookie: {
-      maxAge: 60000 * 60, 
+      maxAge: 60000 * 60, // 1 hour
       secure: false
      }
 }));
-
-// Initialize Passport
-initializePassport(passport, userDAO);
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(flash());
-
-// Global variables for flash messages
-app.use((req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  res.locals.error = req.flash('error');
-  next();
-});
 
 app.use((req, res, next) => {
   if(req.session){
@@ -76,6 +61,24 @@ app.use((req, res, next) => {
   }
   next();
 })
+
+
+
+// Passport
+initializePassport(passport, userDAO);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Flash messages
+app.use(flash());
+
+// Global variables for flash messages
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  next();
+});
 
 
 // Routes and dynamic rendering
@@ -92,8 +95,31 @@ app.post('/login',
     successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true,
-  })
+  }),  
 );
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await userDAO.findUserByEmail(username);
+    if(!user) {
+      return res.status(401).send('Invalid username or password');
+    }
+    const match = await bcrypt.compare(password, user.passport);
+    if(!match){
+      return res.status(401).send('Invalid username or password');
+    }
+
+    req.session.userID = user.id;
+    req.session.username = user.username;
+    console.log('Login successful');
+    res.send('Login successful');
+  } catch (error) {
+    console.error('Login error: ', error);
+    res.status(500).send('An error occurred. Please try agaim');
+  }
+});
 
 app.get('/register', (req, res) => {
   res.render('register');
@@ -131,7 +157,7 @@ app.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await userDAO.createUser(username, email, hashedPassword);
     req.flash('success_msg', 'You are now registered and can log in.');
-    res.render('registration-success', { delay: 3000 }); // Pass the delay time in milliseconds
+    res.render('registration-success', { delay: 3000 });
     res.redirect('/login');
 
   } catch (error) {
@@ -141,6 +167,7 @@ app.post('/register', async (req, res) => {
     res.redirect('/register');
   }
 });
+
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {
