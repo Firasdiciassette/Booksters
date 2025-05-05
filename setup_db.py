@@ -6,7 +6,7 @@ cursor = conn.cursor()
 # cursor.execute("DROP TABLE users")
 # cursor.execute("DELETE FROM sessions")
 # cursor.execute("DELETE FROM users")
-# cursor.execute("DELETE FROM books")
+cursor.execute("DELETE FROM books")
 # cursor.execute("DROP TABLE sessions")
 
 ## CRUD operations ###
@@ -34,9 +34,10 @@ cursor = conn.cursor()
 #         ''')
 
 
-cursor.execute("SELECT * FROM users")
+# cursor.execute("SELECT * FROM users")
 # cursor.execute("SELECT * FROM sessions")
 # cursor.execute("SELECT * FROM books")
+cursor.execute("SELECT * FROM booksOfTheMonth")
 # cursor.execute("SELECT * FROM books where added_by = 1 ORDER BY created_at DESC")
 print(cursor.fetchall())
 

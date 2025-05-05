@@ -51,7 +51,7 @@ li {
     overflow: hidden;
 }
 
-.image-box img{
+.image-box img {
     width: 100%;
     height: auto;
     object-fit: cover; 

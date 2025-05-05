@@ -6,7 +6,7 @@
   <meta name="description" content="Booksters is a free, ad-less, instant e-library where you can discover, share, and review countless books."> 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/css/style.css">
-  <title>Booksters | Because We Are Book Lovers</title>
+  <title>Booksters | Your Planet of Books</title>
 </head>
 <body>
 
@@ -16,7 +16,7 @@
       <li><a href="/">Home</a></li>
       <li><a href="#About">About</a></li>
     </ul>
-    <input type="text" id="searchbar" placeholder="Search...">
+    <input type="text" id="search-title" placeholder="Search by title">
     
     <% if (user) { %>
       <p>Welcome, <%= user.username %>!</p>
@@ -32,7 +32,7 @@
     <% } %>
   </div>
 
-  <!-- Flash Messages -->
+  <!-- flash Messages -->
   <% if (success_msg) { %>
     <div class="flash-success"><%= success_msg %></div>
   <% } %>
@@ -43,11 +43,30 @@
     <div class="flash-error"><%= error %></div>
   <% } %>
 
+  <div id="search-results"></div>
+
   <div class="home-image"> 
     <img src="/images/home-bg.jpg" alt="Bookshelves background"> 
     <h1>Welcome to Booksters</h1>
     <h3>Your pocket library</h3>
   </div>
+<!-- Books of the month vetrina -->
+  <div class="vetrina">
+    <h2>Books of the Month</h2>
+    <!-- insert bg image -->
+      <div class="book-grid">
+        <% botM.forEach(book => { %>
+          <div class="book-card">
+            <h3><%= book.title %></h3>
+            <p><strong>Author:</strong> <%= book.author %></p>
+            <p><strong>Genre:</strong> <%= book.genre %></p>
+            <p><%= book.description %></p>
+            <img src="<%= book.cover_url || '/images/default-cover.jpg' %>" alt="Cover of <%= book.title %>" class="book-cover">
+          </div>
+        <% }) %>        
+      </div>
+  </div>
+  
 
   <footer>
     <div class="footer-company-info">
@@ -61,9 +80,9 @@
       </ul>
     </div>
     <div class="footer-social">
-      <a href="https://www.facebook.com"><img src="/images/facebook-icon.png" alt="Facebook"></a>
-      <a href="https://www.x.com"><img src="/images/twitter-icon.png" alt="X"></a>
-      <a href="https://www.linkedin.com"><img src="/images/linkedin-icon.png" alt="LinkedIn"></a>
+      <a href="https://www.facebook.com">Facebook</a>
+      <a href="https://www.x.com">X</a>
+      <a href="https://www.linkedin.com">LinkedIn</a>
     </div>
     <div class="footer-newsletter">
       <h5>Subscribe to our newsletter:</h5>
@@ -73,6 +92,6 @@
       </form>
     </div>
   </footer>
-
+  <script src="/javascripts/search-books.js"></script>
 </body>
 </html>

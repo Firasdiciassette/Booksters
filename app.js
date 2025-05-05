@@ -6,26 +6,29 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
+const initializePassport = require('./config/passport');
 const bodyParser = require('body-parser');
 const db = require('./config/db');
 const UserDAO = require('./dao/user-dao');
 const SessionDAO = require('./dao/session-dao');
 const BookDAO = require('./dao/book-dao');
-const initializePassport = require('./config/passport');
 const authRoutes = require('./routes/authRoutes');
 const mainRoutes = require('./routes/mainRoutes');
+const bookApiroutes = require('./routes/api/bookApi');
+
 
 const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use('/api', bookApiroutes);
 
 const userDAO = new UserDAO(db);
 const bookDAO = new BookDAO(db);
+const sessionDAO = new SessionDAO(db);
 app.locals.userDAO = userDAO;
 app.locals.bookDAO = bookDAO;
-const sessionDAO = new SessionDAO(db);
 
 /*app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -44,7 +47,7 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 3600000 }
+  cookie: { maxAge: 3600000 } // One hour cookie duration
 }));
 
 app.use((req, res, next) => {

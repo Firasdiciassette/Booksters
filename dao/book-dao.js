@@ -57,6 +57,16 @@ class BookDAO {
         });
     }
 
+    getBooksOfTheMonth() {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM booksOfTheMonth';
+            this.db.all(sql, [], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
     getBookById(id) {
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM books WHERE id = ?';
@@ -76,9 +86,38 @@ class BookDAO {
             });
         });
     }
+// For search API
+searchBooks(filters) {
+    const { title, author, genre } = filters; 
+    const query = [];
+    const params = [];
+
+    if (title) {
+        query.push('title LIKE ?');
+        params.push(`%${title}%`);
+    }
+    if (author) {
+        query.push('author LIKE ?');
+        params.push(`%${author}%`);
+    }
+    if (genre) {
+        query.push('genre LIKE ?');
+        params.push(`%${genre}%`);
+    }
+
+    const where = query.length ? `WHERE ${query.join(' AND ')}` : '';
+    const sql = `SELECT * FROM books ${where}`;
+
+    return new Promise((resolve, reject) => {
+        this.db.all(sql, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
 }
 
-deleteBook(id) {
+
+/* deleteBook(id) {
     return new Promise((resolve, reject) => {
         const sql = 'DELETE FROM books WHERE id = ?';
         this.db.run(sql, [id], function(err) {
@@ -86,7 +125,8 @@ deleteBook(id) {
             resolve();
         });
     });
-}
+} */
 
+}
 
 module.exports = BookDAO;

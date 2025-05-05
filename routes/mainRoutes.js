@@ -11,7 +11,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 
 const bookDAO = new BookDAO(db);
 
-// My Profile route
+// My profile route
 router.get('/profile', ensureAuthenticated, async (req, res) =>{
     const userId = req.user.id;
     const bookDAO = req.app.locals.bookDAO;
@@ -26,29 +26,33 @@ router.get('/profile', ensureAuthenticated, async (req, res) =>{
 });
 
 // Home page
-router.get('/', (req, res) => {
-    bookDAO.getAllBooks() 
-        .then(books => {
-            res.render('index', {
-                books,
-                success_msg: req.flash('success_msg'),
-                error_msg: req.flash('error_msg')
-            });
-        })
-        .catch(err => {
-            console.error('Error fetching books:', err);
-            req.flash('error_msg', 'Failed to load books.');
-            res.redirect('/');
+// Home page
+router.get('/', async (req, res) => {
+    try {
+        const botM = await bookDAO.getBooksOfTheMonth();
+        const books = await bookDAO.getAllBooks();
+
+        res.render('index', {
+            books,
+            botM,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
         });
+    } catch (err) {
+        console.error('Error loading books:', err);
+        req.flash('error_msg', 'Failed to load books.');
+        res.redirect('/');
+    }
 });
 
-/* Add A Book page (rendering a form for book addition)
+
+/* Add A Book page (rendering a form for book addition)*/
 router.get('/add-book', (req, res) => {
     res.render('add-book', {
         success_msg: req.flash('success_msg'),
         error_msg: req.flash('error_msg')
     });
-});*/
+});
 
 // Handle the POST request for adding a new book
 router.post('/books/add', async (req, res) => {
@@ -74,7 +78,7 @@ router.get('/book/:id', (req, res) => {
     bookDAO.getBookById(bookId)
         .then(book => {
             if (!book) {
-                req.flash('error_msg', 'Book not found');
+                req.flash('error_msg', 'Nothing here...');
                 return res.redirect('/');
             }
             res.render('book-details', { book });
