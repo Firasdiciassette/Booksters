@@ -1,56 +1,78 @@
-<!DOCTYPE html">
+<!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <meta charset="utf-8">
-    <meta name="author" content="Firas Tabai">
-    <meta name="description" content="Booksters is a free, ad-less, instant e-library where you can discover, share, and review countless books.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <title>Booksters | Because We Are Book Lovers</title>
+  <meta charset="utf-8">
+  <meta name="author" content="Firas Tabai"> 
+  <meta name="description" content="Booksters is a free, ad-less, instant e-library where you can discover, share, and review countless books."> 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>Booksters | Because We Are Book Lovers</title>
 </head>
 <body>
-    <div class="nav-items">
-        <a class="logo" href="#">Insert Logo Here</a>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="#MyLibrary">My Library</a></li>
-            <li><a href="#About">About</a></li>
-        </ul>
-        <input type="text" id="searchbar" placeholder="Search...">
-        <p><a href="/login">Login</a></p>
-    </div>
-    
-    <div class="home-image">
-        <img src="images/home-bg.jpg" alt="Lotto di libri su scaffali in legno nero">
-        <h1>Welcome to Booksters</h1>
-        <h3>Your pocket library</h3>
-    </div>
 
-    <footer>
-        <div class="footer-company-info">
-            <p>
-            Contact us: <a href="mailto:info@booksters.com">info@booksters.com</a>
-            </p>
-        </div>
-        <div class="footer-nav">
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="#MyLibrary">My Library</a></li>
-                <li><a href="#About">About</a></li>
-            </ul>
-        </div>
-        <div class="footer-social">
-            <a href="https://www.facebook.com"><img src="public/images/facebook-icon.png" alt="Facebook"></a>
-            <a href="https://www.twitter.com"><img src="public/images/twitter-icon.png" alt="Twitter"></a>
-            <a href="https://www.linkedin.com"><img src="public/images/linkedin-icon.png" alt="LinkedIn"></a>
-        </div>
-        <div class="footer-newsletter">
-            <h5> Subscribe to our newsletter: </h5>
-            <form action="/subscribe" method="post">
-                <input type="email" id="subscriber-email" name="email" placeholder="Enter your email">
-                <button type="button">Subscribe</button>
-            </form>
-        </div>
-    </footer>
+  <div class="nav-items">
+    <a class="logo" href="#">Insert Logo Here</a>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="#About">About</a></li>
+    </ul>
+    <input type="text" id="searchbar" placeholder="Search...">
+    
+    <% if (user) { %>
+      <p>Welcome, <%= user.username %>!</p>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin">Admin Dashboard</a>
+      <% } else { %>
+        <a href="/profile">My Library</a>
+      <% } %>
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if (success_msg) { %>
+    <div class="flash-success"><%= success_msg %></div>
+  <% } %>
+  <% if (error_msg) { %>
+    <div class="flash-error"><%= error_msg %></div>
+  <% } %>
+  <% if (error) { %>
+    <div class="flash-error"><%= error %></div>
+  <% } %>
+
+  <div class="home-image"> 
+    <img src="/images/home-bg.jpg" alt="Bookshelves background"> 
+    <h1>Welcome to Booksters</h1>
+    <h3>Your pocket library</h3>
+  </div>
+
+  <footer>
+    <div class="footer-company-info">
+      <p>Contact us: <a href="mailto:info@booksters.com">info@booksters.com</a></p>
+    </div>
+    <div class="footer-nav">
+      <ul>
+        <li><a href="#Home">Home</a></li>
+        <li><a href="#MyLibrary">My Library</a></li>
+        <li><a href="#About">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-social">
+      <a href="https://www.facebook.com"><img src="/images/facebook-icon.png" alt="Facebook"></a>
+      <a href="https://www.x.com"><img src="/images/twitter-icon.png" alt="X"></a>
+      <a href="https://www.linkedin.com"><img src="/images/linkedin-icon.png" alt="LinkedIn"></a>
+    </div>
+    <div class="footer-newsletter">
+      <h5>Subscribe to our newsletter:</h5>
+      <form action="/subscribe" method="post">
+        <input type="email" name="email" placeholder="Enter your email">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </footer>
+
 </body>
 </html>

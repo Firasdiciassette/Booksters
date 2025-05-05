@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/css/style.css">
+        <title>Booksters | Because We Are Book Lovers</title>
+    </head>
+    <div class="nav-items">
+        <a class="logo" href="#">Insert Logo Here</a>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="#About">About</a></li>
+        </ul>
+        <input type="text" id="searchbar" placeholder="Search...">
+        <% if (user) { %>
+            <p><%= user.username %></p>
+            <% if (user.role === 'admin') { %>
+              <a href="/admin">Admin Dashboard</a>
+            <% } else { %>
+              <a href="/profile">My Library</a>
+            <% } %>
+            <a href="/logout">Logout</a>
+          <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <% } %>
+    </div>
+          <% if (success_msg) { %>
+            <div class="flash-success"><%= success_msg %></div>
+          <% } %>
+          <% if (error_msg) { %>
+            <div class="flash-error"><%= error_msg %></div>
+          <% } %>
+    <!-- Adding book -->
+    <div class = "search-box">
+    <form action="/books/add" method="POST">
+        <fieldset>
+            <legend>Add a New Book</legend>
+            <input type="text" name="title" placeholder="Insert book title" required>
+            <input type="text" name="author" placeholder="Insert book author" required>
+            <input type="text" name="genre" placeholder="Insert book genre">
+            <textarea name="description" placeholder="Short description"></textarea>
+            <button type="submit">Add Book</button>
+          </fieldset>
+    </form>
+    </div>
+
+    <!-- Books List -->
+    <div class="book-grid">
+      <% if (books && books.length > 0) { %>
+        <div class="book-grid">
+          <% books.forEach(book => { %>
+            <div class="book-card">
+              <h3><%= book.title %></h3>
+              <p><strong>Author:</strong> <%= book.author %></p>
+              <p><strong>Genre:</strong> <%= book.genre %></p>
+              <p><%= book.description %></p>
+            </div>
+          <% }); %>
+        </div>
+        <% } else { %>
+          <p>You haven't added any books yet.</p>
+        <% } %>      
+    </div>
+    </body>
+</html>

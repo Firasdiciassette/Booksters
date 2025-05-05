@@ -1,4 +1,4 @@
-// user-dao.js
+// /dao/user-dao.js
 const sqlite3 = require('sqlite3').verbose();
 
 class UserDAO {
@@ -6,10 +6,10 @@ class UserDAO {
     this.db = db;
   }
 
-  createUser(username, email, password) {
+  createUser(username, email, password, role) {
     return new Promise((resolve, reject) => {
-      const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-      this.db.run(sql, [username, email, password], function(err) {
+      const sql = 'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)';
+      this.db.run(sql, [username, email, password, role], function(err) {
         if (err) {
           return reject(err);
         }
@@ -51,6 +51,17 @@ class UserDAO {
       });
     });
   }
-}
 
+
+  getUserCount() {
+    return new Promise((resolve, reject) => {
+      this.db.get("SELECT COUNT(*) AS countUsers FROM users", (err, row) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(row?.countUsers || 0);
+      });
+    });
+  }
+}
 module.exports = UserDAO;

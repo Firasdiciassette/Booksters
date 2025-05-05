@@ -1,6 +1,8 @@
+//dao/session-dao.js
+
 class SessionDAO {
     constructor(db) {
-        this.db = db; // Use the provsided database instance
+        this.db = db;
         //console.log("Initializing SessionDAO");
         this.createTable();
     }
@@ -43,4 +45,4 @@ class SessionDAO {
     }
 }
 
-module.exports = SessionDAO; // Ensure you're exporting the class
+module.exports = SessionDAO;

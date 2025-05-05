@@ -1,9 +1,10 @@
+// /public/javascript/form-validation.js
 "use strict";
 document.addEventListener('DOMContentLoaded', () => {
     const username = document.getElementById('username');
     const password = document.getElementById('password');
     const email = document.getElementById('email');
-    const confirmPassword = document.getElementById('confirm-password');
+    const confirmPassword = document.getElementById('confirmPassword');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
@@ -11,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', e => {
             e.preventDefault();
             if (validateLogin()) {
-                console.log('Validating log in ...')
                 loginForm.submit();
             }
         });
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', e => {
             e.preventDefault();
             if (validateRegistration()) {
-                console.log('Validating sign up ...')
+                console.log("Submitting form...");
                 registerForm.submit();
             }
         });
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const validateLogin = () => {
-        console.log('Validating log in ...')
+        //console.log('Validating log in ...')
         const usernameValue = username.value.trim();
         const passValue = password.value.trim();
         let isValid = true;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setError(password, 'Password is required.');
             isValid = false;
         } else if (passValue.length < 4) {
-            setError(password, 'Password must be at least 4 (change this) characters.');
+            setError(password, 'Password must be at least 4 characters.');
             isValid = false;
         } else {
             setSuccess(password);
@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const validateRegistration = () => {
-        console.log('Validating sign in ...')
         const usernameValue = username.value.trim();
         const emailValue = email.value.trim();
         const passValue = password.value.trim();
@@ -106,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setError(password, 'Password is required.');
             isValid = false;
         } else if (passValue.length < 4) {
-            setError(password, 'Password must be at least 4 (change this in the future) characters.');
+            setError(password, 'Password must be at least 4 characters.');
             isValid = false;
         } else {
             setSuccess(password);
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             setSuccess(confirmPassword);
         }
-
+        console.log("Form validation result:", isValid); // This is overkill for privacy
         return isValid;
     }
 

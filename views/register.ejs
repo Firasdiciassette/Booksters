@@ -1,10 +1,10 @@
-<!-- src/views/register.ejs -->
+<!-- /views/register.ejs -->
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="css/login-style.css">
+  <link rel="stylesheet" type="text/css" href="/css/login-style.css">
   <title>Register | Booksters</title>
 </head>
 <body>
@@ -14,12 +14,15 @@
     </div>
     <div class="inner-login-box">
       <h1>Sign-up</h1>
-      <% if (error_msg.length > 0) { %>
-        <div class="alert alert-danger"><%= error_msg %></div>
+
+      <% if (error_msg && error_msg.length > 0) { %>
+        <div class="flash-error"><%= error_msg %></div>
       <% } %>
-      <% if (success_msg.length > 0) { %>
-        <div class="alert alert-success"><%= success_msg %></div>
+
+      <% if (success_msg && success_msg.length > 0) { %>
+        <div class="flash-success"><%= success_msg %></div>
       <% } %>
+
       <form id="register-form" action="/register" method="POST">
         <ul>
           <li>
@@ -44,9 +47,9 @@
             </div>
           </li>
           <li>
-            <label for="confirm-password">Confirm Your Password</label>
+            <label for="confirmPassword">Confirm Your Password</label>
             <div class="input-control">
-              <input type="password" id="confirm-password" name="confirm-password" size="30">
+              <input type="password" id="confirmPassword" name="confirmPassword" size="30">
               <div class="error"></div>
             </div>
           </li>

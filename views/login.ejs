@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="css/login-style.css">
+    <link rel="stylesheet" type="text/css" href="../css/login-style.css">
     <title>Login | Booksters</title>
 </head>
 <body>
@@ -12,10 +12,18 @@
         <div class="image-box">
             <img src="/images/login-bookshelf.jpg" alt="Scaffali di libri e scale">
         </div>
-        <div class="inner-login-box">
+        <div class="inner-login-box"> 
             <h1>Sign-in</h1>
             <% if (error_msg) { %>
-            <div class="alert alert-danger"><%= error_msg %></div>
+                <div class="flash-error"><%= error_msg %></div>
+            <% } %>
+              
+            <% if (error && error.length > 0) { %>
+            <div class="flash-error"><%= error %></div>
+            <% } %>
+            
+            <% if (success_msg && success_msg.length > 0) { %>
+            <div class="flash-success"><%= success_msg %></div>
             <% } %>
             <form id="login-form" action="/login" method="POST">
                 <ul>
