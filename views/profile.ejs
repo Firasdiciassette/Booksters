@@ -35,6 +35,7 @@
           <% } %>
     <!-- Adding book -->
     <div class = "search-box">
+    <% if (user && user.role === 'user') { %>
     <form action="/books/add" method="POST">
         <fieldset>
             <legend>Add a New Book</legend>
@@ -45,8 +46,22 @@
             <button type="submit">Add Book</button>
           </fieldset>
     </form>
-    </div>
-
+    <% } %>
+  <!-- Adding book of the month -->
+   <% if (user && user.role === 'admin') { %>
+        <form action="/booksOfTheMonth/add" method="POST">
+          <fieldset>
+            <legend>Add a New Book Of The Month</legend>
+            <input type="text" name="title" placeholder="Book title" required>
+            <input type="text" name="author" placeholder="Book author" required>
+            <input type="text" name="genre" placeholder="Book genre">
+            <textarea name="description" placeholder="Add a short description"></textarea>
+            <input type="text" name="cover_url" placeholder="Book cover">
+            <button type="submit">Add Book of the Month</button>
+          </fieldset>
+        </form>
+        </div>
+   <% } %>
     <!-- Books List -->
     <div class="book-grid">
       <% if (books && books.length > 0) { %>
@@ -64,5 +79,6 @@
     <% } %>
         
     </div>
+
     </body>
 </html>

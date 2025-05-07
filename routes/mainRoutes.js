@@ -47,13 +47,11 @@ router.get('/profile', isAuthenticated, async (req, res) =>{
     }
 }); 
 
-// BotM book adding
+// botm book adding
 router.post('/library/add', isAuthenticated, async (req, res) => {
     let { bookId } = req.body;
     const userId = req.user.id;
-
     try {
-        
         const botmBook = await bookDAO.getBookOfTheMonthById(bookId);
         if (!botmBook) {
             req.flash('error_msg', 'Book not found.');
@@ -61,7 +59,6 @@ router.post('/library/add', isAuthenticated, async (req, res) => {
         }
         let existingBook = await bookDAO.getBookByTitleAndAuthor(botmBook.title, botmBook.author);
         let newBookId;
-
         if (existingBook) {
             newBookId = existingBook.id;
         } else {
@@ -75,20 +72,14 @@ router.post('/library/add', isAuthenticated, async (req, res) => {
             );
             newBookId = inserted.id;
         }
-
-        
         const alreadyAdded = await bookDAO.getBookAddedByUser(newBookId, userId);
         if (alreadyAdded) {
             req.flash('error_msg', 'This book is already in your library.');
             return res.redirect('/');
         }
-
-        
         await bookDAO.insertBookByUser(userId, newBookId);
-
         req.flash('success_msg', 'Book added into your library!');
         res.redirect('/profile');
-
     } catch (err) {
         console.error(err);
         req.flash('error_msg', 'Failed to add book into your library.');
@@ -97,7 +88,7 @@ router.post('/library/add', isAuthenticated, async (req, res) => {
 });
  
 
-// Post req for book addition
+// Post req for 'generic' book addition
 router.post('/books/add', isAuthenticated, async (req, res) => {
     const { title, author, genre, description } = req.body;
     const addedBy = req.user.id;
@@ -114,15 +105,28 @@ router.post('/books/add', isAuthenticated, async (req, res) => {
     }
 });
 
+// admin botm adding
+router.post('/booksOfTheMonth/add', isAdmin, async (req, res) => {
+    const { title, author, genre, description, cover_url} = req.body;
+    try {
+        await bookDAO.addBookByAdmin(title, author, genre, description, cover_url);
+        req.flash('success_msg', 'Book of the month added successfully!');
+        res.redirect('/profile');
+    }catch(err){
+        console.error(err);
+        req.flash('error_msg', 'Error while adding new book of the monht');
+        res.redirect('/profile');
+    }
+});
+
 // BotM deletion route
-// Book deletion route
 router.post('/books/delete', isAdmin, async (req, res) => {
     const bookId = req.body.bookId;
     //console.log('current user in session: ', req.session.user);
 
     try {
         await bookDAO.deleteBookAdmin(bookId);
-        req.flash('success_msg', 'Book removed from the "Books of the Month" list successfully.');
+        req.flash('success_msg', 'Book of the Month removed successfully.');
         const botM = await bookDAO.getBooksOfTheMonth();
         const books = await bookDAO.getAllBooks();
         res.render('index', {
@@ -136,8 +140,6 @@ router.post('/books/delete', isAdmin, async (req, res) => {
         res.status(500).send('Error occurred while deleting book');
     }
 });
-
-
 
 
 // View a specific book (TO BE FIXED...)

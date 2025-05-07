@@ -47,6 +47,20 @@ class BookDAO {
         });
     }
 
+    addBookByAdmin(title, author, genre, description, coverUrl){
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO booksOfTheMonth (title, author, genre, description, cover_url)
+            values (?, ?, ?, ?, ?)`;
+            const params = [title, author, genre, description, coverUrl];
+            this.db.run(sql, params, function(err) {
+                if(err) {
+                    return reject(err);
+                }
+                resolve({id: this.lastID});
+            });
+        });
+    }
+
     insertBookByUser(userId, bookId) {
         return new Promise((resolve, reject) => {
             const sql = `INSERT INTO user_books (user_id, book_id) VALUES (?, ?)`;
@@ -56,12 +70,6 @@ class BookDAO {
             });
         });
     }
-
-    /*insertBookByAdmin(userId, bookId){
-        return new Promise((resolve, reject) => {
-            const sql = 'INSERT INTO booksOfTheMonth'
-        });
-    }*/
 
     getAllBooks() {
         return new Promise((resolve, reject) => {
