@@ -14,15 +14,14 @@ const SessionDAO = require('./dao/session-dao');
 const BookDAO = require('./dao/book-dao');
 const authRoutes = require('./routes/authRoutes');
 const mainRoutes = require('./routes/mainRoutes');
-const bookApiroutes = require('./routes/api/bookApi');
-
+const bookSearchApi = require('./routes/api/bookSearch');
 
 const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use('/api', bookApiroutes);
+app.use('/api', bookSearchApi);
 
 const userDAO = new UserDAO(db);
 const bookDAO = new BookDAO(db);
@@ -47,7 +46,7 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 3600000 } // One hour cookie duration
+  cookie: { maxAge: 3600000 } // Cookies will last for one hour
 }));
 
 app.use((req, res, next) => {
@@ -64,11 +63,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+// This makes sure the flash messages and the user req body are passed globally to all views.
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
   res.locals.user = req.user;
+  console.log(req.user);
   next();
 });
 
