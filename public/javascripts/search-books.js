@@ -20,31 +20,29 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`/api/books?title=${encodeURIComponent(title)}`);
             const books = await res.json();
-            results.innerHTML = ''; // Clear previous results
+            results.innerHTML = '';
     
             if (!books.length) {
-                results.innerHTML = '<p>No books found.</p>';
+                results.innerHTML = "<p>Wow, it's empty down here</p>";
                 return;
             }
     
-            // Create a container for the book grid
             const bookGrid = document.createElement('div');
-            bookGrid.className = 'book-grid';  // This will apply the grid layout
+            bookGrid.className = 'book-grid';
     
                 books.forEach(book => {
                     const div = document.createElement('div');
-                    div.className = 'book-card'; // This applies card styles
+                    div.className = 'book-card';
                     div.innerHTML = `
                         <h3>${book.title}</h3>
                         <p><strong>Author:</strong> ${book.author}</p>
                         <p><strong>Genre:</strong> ${book.genre}</p>
                         <p>${book.description}</p>
-                        <img src="${book.cover_url || '../images/default-cover.jpg'}" alt="Book Cover" class="book-cover">
+                        <img src="${book.cover_url || '/images/default-cover.png'}" alt="Book Cover" class="book-cover">
                     `;
                     bookGrid.appendChild(div);
                 });
     
-            // Append the grid container to the results div
             results.appendChild(bookGrid);
         } catch (error) {
             console.error('Search failed:', error);

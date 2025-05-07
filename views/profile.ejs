@@ -8,16 +8,16 @@
         <title>Booksters | Because We Are Book Lovers</title>
     </head>
     <div class="nav-items">
-        <a class="logo" href="#">Insert Logo Here</a>
+      <img src="/images/BOOKSTERS.png" alt="Booksters Logo">  
         <ul>
           <li><a href="/">Home</a></li>
           <li><a href="#About">About</a></li>
         </ul>
-        <input type="text" id="searchbar" placeholder="Search...">
+        <!-- Not available in user profile <input type="text" id="searchbar" placeholder="Search..."> -->
         <% if (user) { %>
             <p><%= user.username %></p>
             <% if (user.role === 'admin') { %>
-              <a href="/admin">Admin Dashboard</a>
+              <a href="/profile">Admin Dashboard</a>
             <% } else { %>
               <a href="/profile">My Library</a>
             <% } %>
@@ -38,10 +38,10 @@
     <form action="/books/add" method="POST">
         <fieldset>
             <legend>Add a New Book</legend>
-            <input type="text" name="title" placeholder="Insert book title" required>
-            <input type="text" name="author" placeholder="Insert book author" required>
-            <input type="text" name="genre" placeholder="Insert book genre">
-            <textarea name="description" placeholder="Short description"></textarea>
+            <input type="text" name="title" placeholder="Book title" required>
+            <input type="text" name="author" placeholder="Book author" required>
+            <input type="text" name="genre" placeholder="Book genre">
+            <textarea name="description" placeholder="Add a short description"></textarea>
             <button type="submit">Add Book</button>
           </fieldset>
     </form>
@@ -50,19 +50,19 @@
     <!-- Books List -->
     <div class="book-grid">
       <% if (books && books.length > 0) { %>
-        <div class="book-grid">
-          <% books.forEach(book => { %>
+        <% books.forEach(book => { %>
             <div class="book-card">
-              <h3><%= book.title %></h3>
-              <p><strong>Author:</strong> <%= book.author %></p>
-              <p><strong>Genre:</strong> <%= book.genre %></p>
-              <p><%= book.description %></p>
+                <h3><%= book.title %></h3>
+                <p><strong>Author:</strong> <%= book.author %></p>
+                <p><strong>Genre:</strong> <%= book.genre %></p>
+                <p><%= book.description %></p>
+                <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
             </div>
-          <% }); %>
-        </div>
-        <% } else { %>
-          <p>You haven't added any books yet.</p>
-        <% } %>      
+        <% }) %>
+    <% } else { %>
+        <p>No books added to your library yet.</p>
+    <% } %>
+        
     </div>
     </body>
 </html>

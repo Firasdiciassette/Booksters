@@ -15,11 +15,26 @@ const authController = require('../controllers/authController.js');
 //console.log('authRoutes loaded'); 
 
 router.get('/login', authController.getLogin);
-router.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-  failureFlash: true
-}));
+router.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      req.flash('error_msg', 'Invalid credentials');
+      return res.redirect('/login');
+    }
+    req.logIn(user, err => {
+      if (err) return next(err);
+      // store extra user data in session
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        role: user.role
+      };
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
+
 
 router.get('/register', authController.getRegister);
 router.post('/register', authController.postRegister);

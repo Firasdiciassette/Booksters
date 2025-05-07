@@ -7,55 +7,98 @@ const express = require('express');
 const router = express.Router();
 const BookDAO = require('../dao/book-dao');
 const db = require('../config/db');
-const { ensureAuthenticated } = require('../middleware/auth');
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 
 const bookDAO = new BookDAO(db);
 
-// My profile route
-router.get('/profile', ensureAuthenticated, async (req, res) =>{
-    const userId = req.user.id;
-    const bookDAO = req.app.locals.bookDAO;
-    try {
-        const books = await bookDAO.getBooksByUser(userId);
-        res.render('profile', { books: books, user: req.user });
-    } catch (err) {
-        console.error(err);
-        req.flash('error_msg', 'Loading books failed');
-        res.render('profile', { books: [] });
-    }
-});
-
-// Home page
 // Home page
 router.get('/', async (req, res) => {
     try {
         const botM = await bookDAO.getBooksOfTheMonth();
         const books = await bookDAO.getAllBooks();
-
         res.render('index', {
             books,
             botM,
-            success_msg: req.flash('success_msg'),
-            error_msg: req.flash('error_msg')
+            user: req.session.user
+            // useless because you already defined them globally in app.js
+            //success_msg: req.flash('success_msg'), 
+            //error_msg: req.flash('error_msg')
         });
     } catch (err) {
+        console.log('Flash error: ', req.flash('error_msg'));
         console.error('Error loading books:', err);
         req.flash('error_msg', 'Failed to load books.');
         res.redirect('/');
     }
 });
 
+// My profile route
+router.get('/profile', isAuthenticated, async (req, res) =>{
+    const userId = req.user.id;
+    const bookDAO = req.app.locals.bookDAO;
+    try {
+        const books = await bookDAO.getBooksByUser(userId);
+        //console.log('Books for user:', books);
+        res.render('profile', { books: books, user: req.user });
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Loading books failed');
+        res.render('profile', { books: [] });
+    }
+}); 
 
-/* Add A Book page (rendering a form for book addition)*/
-router.get('/add-book', (req, res) => {
-    res.render('add-book', {
-        success_msg: req.flash('success_msg'),
-        error_msg: req.flash('error_msg')
-    });
+// BotM book adding
+router.post('/library/add', isAuthenticated, async (req, res) => {
+    let { bookId } = req.body;
+    const userId = req.user.id;
+
+    try {
+        
+        const botmBook = await bookDAO.getBookOfTheMonthById(bookId);
+        if (!botmBook) {
+            req.flash('error_msg', 'Book not found.');
+            return res.redirect('/');
+        }
+        let existingBook = await bookDAO.getBookByTitleAndAuthor(botmBook.title, botmBook.author);
+        let newBookId;
+
+        if (existingBook) {
+            newBookId = existingBook.id;
+        } else {
+            const inserted = await bookDAO.addBook(
+                botmBook.title,
+                botmBook.author,
+                botmBook.genre,
+                botmBook.description,
+                botmBook.cover_url,
+                null
+            );
+            newBookId = inserted.id;
+        }
+
+        
+        const alreadyAdded = await bookDAO.getBookAddedByUser(newBookId, userId);
+        if (alreadyAdded) {
+            req.flash('error_msg', 'This book is already in your library.');
+            return res.redirect('/');
+        }
+
+        
+        await bookDAO.insertBookByUser(userId, newBookId);
+
+        req.flash('success_msg', 'Book added into your library!');
+        res.redirect('/profile');
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Failed to add book into your library.');
+        res.redirect('/');
+    }
 });
+ 
 
-// Handle the POST request for adding a new book
-router.post('/books/add', async (req, res) => {
+// Post req for book addition
+router.post('/books/add', isAuthenticated, async (req, res) => {
     const { title, author, genre, description } = req.body;
     const addedBy = req.user.id;
     const date = new Date().toISOString();
@@ -71,7 +114,33 @@ router.post('/books/add', async (req, res) => {
     }
 });
 
-// View a specific book
+// BotM deletion route
+// Book deletion route
+router.post('/books/delete', isAdmin, async (req, res) => {
+    const bookId = req.body.bookId;
+    //console.log('current user in session: ', req.session.user);
+
+    try {
+        await bookDAO.deleteBookAdmin(bookId);
+        req.flash('success_msg', 'Book removed from the "Books of the Month" list successfully.');
+        const botM = await bookDAO.getBooksOfTheMonth();
+        const books = await bookDAO.getAllBooks();
+        res.render('index', {
+            books,
+            botM,
+            user: req.session.user, 
+            success_msg: req.flash('success_msg')
+        });
+    } catch (err) {
+        console.error('Error deleting book:', err);
+        res.status(500).send('Error occurred while deleting book');
+    }
+});
+
+
+
+
+// View a specific book (TO BE FIXED...)
 router.get('/book/:id', (req, res) => {
     const bookId = req.params.id;
 
