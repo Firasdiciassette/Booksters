@@ -25,10 +25,14 @@
 // !!! sessions
 
   passport.serializeUser((user, done) => done(null, user.id)); // stores the user ID in the session
-  passport.deserializeUser((id, done) => { // deserializeUser: retrieves full user via userDAO.findUserById(id)
-    userDAO.findUserById(id)
-      .then(user => done(null, user))
-      .catch(err => done(err));
+  passport.deserializeUser(async(id, done) => { // deserializeUser: 
+  // retrieves full user (including role) via userDAO.findUserById(id)
+    try {
+      const user = await userDAO.findUserById(id); // also returns the role
+      done(null, user);
+    } catch {
+      done(err);
+    }   
   });   
 }
   module.exports = initialize;
