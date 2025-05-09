@@ -39,25 +39,46 @@ cursor = conn.cursor()
     #     FOREIGN KEY (user_id) REFERENCES users (id),
     #     FOREIGN KEY (book_id) REFERENCES books(id) )
 #     ''')
+
+
+# cursor.execute('''
+#         CREATE TABLE IF NOT EXISTS reviews (
+#         id INTEGER PRIMARY KEY AUTOINCREMENT,
+#         user_id INTEGER NOT NULL,
+#         book_id INTEGER NOT NULL,
+#         content TEXT NOT NULL,
+#         rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+#         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+#         FOREIGN KEY (user_id) REFERENCES users(id),
+#         FOREIGN KEY (book_id) REFERENCES books(id)
+#         );
+#     ''')
+
 # cursor.execute("DROP TABLE sessions")
 # cursor.execute("DROP TABLE users")
+# cursor.execute("DROP TABLE booksOfTheMonth")
 # cursor.execute("DELETE FROM sessions")
 # cursor.execute("DELETE FROM users")
 # cursor.execute("DELETE FROM books")
+# cursor.execute("DELETE FROM booksOfTheMonth")
 # cursor.execute("DELETE FROM user_books")
+# cursor.execute("DELETE FROM reviews")
 
 
 # cursor.execute("SELECT * FROM users")
 # cursor.execute("SELECT * FROM sessions")
-cursor.execute("SELECT * FROM booksOfTheMonth")
+# cursor.execute("SELECT * FROM booksOfTheMonth")
 # cursor.execute("SELECT * FROM books")
 # cursor.execute("SELECT * FROM user_books")
+# cursor.execute("SELECT * FROM reviews")
 # cursor.execute('''
 #     SELECT books.*
 #     FROM books
 #     INNER JOIN user_books on books.id = user_books.book_id
 #     WHERE user_books.user_id = ?
 #     ''', 1)
+
+
 
 # print('Books for user:', books)
 

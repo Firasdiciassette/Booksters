@@ -12,6 +12,7 @@ const db = require('./config/db');
 const UserDAO = require('./dao/user-dao');
 const SessionDAO = require('./dao/session-dao');
 const BookDAO = require('./dao/book-dao');
+const ReviewDAO = require('./dao/review-dao');
 const authRoutes = require('./routes/authRoutes');
 const mainRoutes = require('./routes/mainRoutes');
 const bookSearchApi = require('./routes/api/bookSearch');
@@ -26,8 +27,10 @@ app.use('/api', bookSearchApi);
 const userDAO = new UserDAO(db);
 const bookDAO = new BookDAO(db);
 const sessionDAO = new SessionDAO(db);
+const reviewDAO = new ReviewDAO(db);
 app.locals.userDAO = userDAO;
 app.locals.bookDAO = bookDAO;
+app.locals.reviewDAO = reviewDAO;
 
 /*app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -69,7 +72,7 @@ app.use((req, res, next) => {
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
   res.locals.user = req.user;
-  console.log(req.user);
+  //console.log(req.user);
   next();
 });
 

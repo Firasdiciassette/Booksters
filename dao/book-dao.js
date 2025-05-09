@@ -46,13 +46,11 @@ class BookDAO {
             });
         });
     }
-
-    addBookByAdmin(title, author, genre, description, coverUrl){
+    // also known as: addBookOfTheMonth
+    addBookByAdmin(id){
         return new Promise((resolve, reject) => {
-            const sql = `INSERT INTO booksOfTheMonth (title, author, genre, description, cover_url)
-            values (?, ?, ?, ?, ?)`;
-            const params = [title, author, genre, description, coverUrl];
-            this.db.run(sql, params, function(err) {
+            const sql = `INSERT INTO booksOfTheMonth (book_id) values (?)`;
+            this.db.run(sql, [id], function(err) {
                 if(err) {
                     return reject(err);
                 }
@@ -83,7 +81,11 @@ class BookDAO {
 
     getBooksOfTheMonth() {
         return new Promise((resolve, reject) => {
-            const sql = 'SELECT * FROM booksOfTheMonth';
+            const sql = `
+                SELECT b.*
+                FROM booksOfTheMonth botm
+                JOIN books b ON botm.book_id = b.id
+        `;
             this.db.all(sql, [], (err, rows) => {
                 if (err) return reject(err);
                 resolve(rows);
@@ -93,13 +95,17 @@ class BookDAO {
 
     getBookOfTheMonthById(id) {
         return new Promise((resolve, reject) => {
-            const sql = 'SELECT * FROM booksOfTheMonth WHERE id = ?';
-            this.db.get(sql, [id], (err, row) => {
-                if (err) return reject(err);
-                resolve(row);
-            });
+        const sql = `SELECT b.*
+            FROM booksOfTheMonth botm
+            JOIN books b ON botm.book_id = b.id
+            WHERE botm.id = ?
+        `;
+        this.db.get(sql, [id], (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
         });
-    }
+    });
+}
     
     getBookByTitleAndAuthor(title, author) {
         return new Promise((resolve, reject) => {
@@ -146,25 +152,20 @@ class BookDAO {
             });
         });
     }
-    
 
-    // For search API
+    // For search REST api
     searchBooks(title) {
         return new Promise((resolve, reject) => {
             const sql = `
-                SELECT title, author, genre, description, cover_url FROM booksOfTheMonth
-                WHERE title LIKE ?
-                UNION
                 SELECT title, author, genre, description, cover_url FROM books
                 WHERE title LIKE ?
             `;
-            this.db.all(sql, [`%${title}%`, `%${title}%`], (err, rows) => {
+            this.db.all(sql, [`%${title}%`], (err, rows) => {
                 if (err) return reject(err);
                 resolve(rows);
             });
         });
     }
-    
 
     deleteBook(id) {
         return new Promise((resolve, reject) => {
@@ -176,9 +177,19 @@ class BookDAO {
         });
     }
 
+    deleteBookFromUserLibrary(userId, bookId) {
+        return new Promise((resolve, reject) => {
+            const sql = 'DELETE FROM user_books WHERE user_id = ? AND book_id = ?';
+            this.db.run(sql, [userId, bookId], function(err) {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+
     deleteBookAdmin(id) {
         return new Promise((resolve, reject) => {
-            const sqlDeleteFromBooksOfTheMonth = 'DELETE FROM booksOfTheMonth WHERE id = ?';
+            const sqlDeleteFromBooksOfTheMonth = 'DELETE FROM booksOfTheMonth WHERE book_id = ?';
             this.db.run(sqlDeleteFromBooksOfTheMonth, [id], (err) => {
                 if (err) return reject(err);
                 resolve();

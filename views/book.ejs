@@ -1,0 +1,106 @@
+<!-- views/book.ejs --> 
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Firas Tabai"> 
+  <meta name="description" content="Booksters is a free, ad-less, instant e-library where you can 
+  discover, share, and review countless books."> 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/style.css">
+  <title>Booksters | <%= book.title %> </title>
+</head>
+
+<body>
+
+  <div class="nav-items">
+    <img src="/images/booksters-logo.png" alt="Booksters Logo">  
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="#About">About</a></li>
+    </ul>
+
+    <% if (user) { %>
+        <p>Welcome, <%= user.username %>!</p>
+        <% if (user.role === 'admin') { %>
+          <a href="/profile">Admin Dashboard</a>
+        <% } else { %>
+          <a href="/profile">My Library</a>
+        <% } %>
+        <a href="/logout">Logout</a>
+      <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      <% } %>
+    </div>
+    
+  </div>
+
+  <!-- Flash messages -->
+  <% if (success_msg && success_msg.length > 0) { %>
+    <div class="flash-success"><%= success_msg %></div>
+  <% } %>
+  <% if (error_msg && error_msg.length > 0) { %>
+    <div class="flash-error"><%= error_msg %></div>
+  <% } %>
+
+  <!-- Book details -->
+  <div class="book-details">
+    <h2><%= book.title %></h2>
+    <p><strong>Author:</strong> <%= book.author %></p>
+    <p><strong>Genre:</strong> <%= book.genre %></p>
+    <p><%= book.description %></p>
+    <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>">
+  </div>
+
+  <!-- Review Form -->
+  <% if (user) { %>
+    <div class="review-form">
+      <form action="/books/review" method="POST">
+        <input type="hidden" name="book_id" value="<%= book.id %>">
+        <textarea name="content" placeholder="So what do you think?" required></textarea>
+        
+        <label for="rating">Rating (1 to 5):</label>
+        <select name="rating" required>
+          <option value="" disabled selected>Select a rating</option>
+          <% for (let i = 1; i <= 5; i++) { %>
+            <option value="<%= i %>"><%= i %> Stars</option>
+          <% } %>
+        </select>
+
+        <button type="submit">Submit Review</button>
+      </form>
+    </div>
+  <% } else { %>
+    <p><a href="/login">Login</a> to leave a review.</p>
+  <% } %>
+
+    
+  <!-- Footer -->
+  <footer>
+    <div class="footer-company-info">
+      <p>Contact us: <a href="mailto:info@booksters.com">info@booksters.com</a></p>
+    </div>
+    <div class="footer-nav">
+      <ul>
+        <li><a href="#Home">Home</a></li>
+        <li><a href="#MyLibrary">My Library</a></li>
+        <li><a href="#About">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-social">
+      <a href="https://www.facebook.com">Facebook</a>
+      <a href="https://www.x.com">X</a>
+      <a href="https://www.linkedin.com">LinkedIn</a>
+    </div>
+    <div class="footer-newsletter">
+      <h5>Subscribe to our newsletter:</h5>
+      <form action="/subscribe" method="post">
+        <input type="email" name="email" placeholder="Enter your email">
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </footer>
+
+</body>
+</html>
