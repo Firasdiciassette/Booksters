@@ -8,12 +8,15 @@
         <title>Booksters | Because We Are Book Lovers</title>
     </head>
     <div class="nav-items">
-      <img src="/images/BOOKSTERS.png" alt="Booksters Logo">  
+      <a href="/">
+        <img src="/images/booksters-logo.png" alt="Booksters Logo">  
+      </a>
         <ul>
           <li><a href="/">Home</a></li>
           <li><a href="#About">About</a></li>
         </ul>
-        <!-- Not available in user profile <input type="text" id="searchbar" placeholder="Search..."> -->
+        <input type="text" id="search-title" placeholder="Search by title...">
+        
         <% if (user) { %>
             <p><%= user.username %></p>
             <% if (user.role === 'admin') { %>
@@ -33,7 +36,8 @@
           <% if (error_msg) { %>
             <div class="flash-error"><%= error_msg %></div>
           <% } %>
-    <!-- Adding book -->
+          <div id="search-results"></div>
+    <!-- Adding 'generic' book -->
     <div class = "search-box">
     <% if (user && user.role === 'user') { %>
     <form action="/books/add" method="POST">
@@ -42,12 +46,13 @@
             <input type="text" name="title" placeholder="Book title" required>
             <input type="text" name="author" placeholder="Book author" required>
             <input type="text" name="genre" placeholder="Book genre">
+            <input type="text" name="cover_url" placeholder="Book cover">
             <textarea name="description" placeholder="Add a short description"></textarea>
             <button type="submit">Add Book</button>
           </fieldset>
     </form>
     <% } %>
-  <!-- Adding book of the month -->
+    <!-- Adding book of the month -->
    <% if (user && user.role === 'admin') { %>
         <form action="/booksOfTheMonth/add" method="POST">
           <fieldset>
@@ -55,16 +60,16 @@
             <input type="text" name="title" placeholder="Book title" required>
             <input type="text" name="author" placeholder="Book author" required>
             <input type="text" name="genre" placeholder="Book genre">
-            <textarea name="description" placeholder="Add a short description"></textarea>
             <input type="text" name="cover_url" placeholder="Book cover">
+            <textarea name="description" placeholder="Add a short description"></textarea>
             <button type="submit">Add Book of the Month</button>
           </fieldset>
         </form>
         </div>
    <% } %>
-    <!-- Books List -->
+    <!-- 'dynamic' Books List -->
     <div class="book-grid">
-      <% if (books && books.length > 0) { %>
+      <% if (books && books.length > 0) %>
         <% books.forEach(book => { %>
             <div class="book-card">
                 <h3><%= book.title %></h3>
@@ -72,13 +77,15 @@
                 <p><strong>Genre:</strong> <%= book.genre %></p>
                 <p><%= book.description %></p>
                 <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
-            </div>
+                <form action="/books/delete" method="POST">
+                  <input type="hidden" name="bookId" value="<%= book.id %>">
+                  <button type="submit">Remove Book</button>
+                </form>
+              </div>
         <% }) %>
-    <% } else { %>
-        <p>No books added to your library yet.</p>
-    <% } %>
+    
         
     </div>
-
+    <script src="/javascripts/search-books.js"></script>
     </body>
 </html>
