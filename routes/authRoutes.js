@@ -20,17 +20,16 @@ router.post('/login', (req, res, next) => {
     if (err) return next(err);
     if (!user) {
       req.flash('error_msg', 'Invalid credentials');
-      return res.redirect('/login');
+      return res.redirect('/');
     }
     req.logIn(user, err => {
       if (err) return next(err);
-      // store extra user data in session
       req.session.user = {
         id: user.id,
         username: user.username,
         role: user.role
       };
-      return res.redirect('/');
+      return res.redirect('/profile');
     });
   })(req, res, next);
 });
