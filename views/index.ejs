@@ -11,7 +11,9 @@
     <body>
 
       <div class="nav-items">
-        <img src="/images/BOOKSTERS.png" alt="Booksters Logo">
+        <a href="/">
+          <img src="/images/booksters-logo.png" alt="Booksters Logo">  
+        </a>
         <ul>
           <li><a href="/">Home</a></li>
           <li><a href="#About">About</a></li>
@@ -60,8 +62,9 @@
                 <p><strong>Author:</strong> <%= book.author %></p>
                 <p><strong>Genre:</strong> <%= book.genre %></p>
                 <p><%= book.description %></p>
-                <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" 
-                    class="book-cover">
+                <a href="/books/<%= book.id %>">
+                  <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
+                </a>
              
                 <form action="/library/add" method="post">
                   <input type="hidden" name="bookId" value="<%= book.id %>">
@@ -69,8 +72,8 @@
                 </form>
                 
                 <% if (user && user.role === 'admin') { %>
-                  <form action="/books/delete" method="POST">
-                    <input type="hidden" name="bookId" value="<%= book.id %>">
+                  <form action="/booksOfTheMonth/delete" method="POST">
+                  <input type="hidden" name="bookId" value="<%= book.id %>">
                     <button type="submit">Remove book</button>
                   </form>
                 <% } %>
@@ -78,32 +81,64 @@
           <% }) %>      
           </div>
       </div>
+        
+      <!-- Reviews -->
+      <h2>What our users think</h2>
+      <% if (reviews && reviews.length > 0) { %>
+        <% reviews.forEach(review => { %>
+          <div class="review">
+            <p><strong><%= review.username || 'Anonymous' %>:</strong> <%= review.content %></p>
       
-      <!-- Footer -->
-      <footer>
-        <div class="footer-company-info">
-          <p>Contact us: <a href="mailto:info@booksters.com">info@booksters.com</a></p>
-        </div>
-        <div class="footer-nav">
-          <ul>
-            <li><a href="#Home">Home</a></li>
-            <li><a href="#MyLibrary">My Library</a></li>
-            <li><a href="#About">About</a></li>
-          </ul>
-        </div>
-        <div class="footer-social">
-          <a href="https://www.facebook.com">Facebook</a>
-          <a href="https://www.x.com">X</a>
-          <a href="https://www.linkedin.com">LinkedIn</a>
-        </div>
-        <div class="footer-newsletter">
-          <h5>Subscribe to our newsletter:</h5>
-          <form action="/subscribe" method="post">
-            <input type="email" name="email" placeholder="Enter your email">
-            <button type="submit">Subscribe</button>
-          </form>
-        </div>
-      </footer>
+            <% if (review.rating) { %>
+              <p>Rating: <%= review.rating %>/5</p>
+            <% } %>
+      
+            <!-- Book details -->
+            <div class="reviewed-book-info">
+              <a href="/books/<%= review.book_id %>">
+                <img src="<%= review.book_cover || '/images/default-cover.png' %>" alt="Cover of <%= review.book_title %>" width="60">
+              </a>
+              <p>
+                <strong>Book:</strong> <a href="/books/<%= review.book_id %>"><%= review.book_title %></a><br>
+                <strong>Author:</strong> <%= review.book_author %>
+              </p>
+            </div>
+      
+            <p><small>
+              <%= review.created_at ? new Date(review.created_at).toLocaleString() : 'Unknown date' %>
+            </small></p>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No reviews yet. Be the first to write one!</p>
+      <% } %>
+      
+            
+        <!-- Footer -->
+        <footer>
+          <div class="footer-company-info">
+            <p>Contact us: <a href="mailto:info@booksters.com">info@booksters.com</a></p>
+          </div>
+          <div class="footer-nav">
+            <ul>
+              <li><a href="#Home">Home</a></li>
+              <li><a href="#MyLibrary">My Library</a></li>
+              <li><a href="#About">About</a></li>
+            </ul>
+          </div>
+          <div class="footer-social">
+            <a href="https://www.facebook.com">Facebook</a>
+            <a href="https://www.x.com">X</a>
+            <a href="https://www.linkedin.com">LinkedIn</a>
+          </div>
+          <div class="footer-newsletter">
+            <h5>Subscribe to our newsletter:</h5>
+            <form action="/subscribe" method="post">
+              <input type="email" name="email" placeholder="Enter your email">
+              <button type="submit">Subscribe</button>
+            </form>
+          </div>
+        </footer>
       <script src="/javascripts/search-books.js"></script>
     </body>
     </html>

@@ -34,11 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const div = document.createElement('div');
                     div.className = 'book-card';
                     div.innerHTML = `
+                       
                         <h3>${book.title}</h3>
                         <p><strong>Author:</strong> ${book.author}</p>
                         <p><strong>Genre:</strong> ${book.genre}</p>
                         <p>${book.description}</p>
+                         <a href="/books/${book.id}">
                         <img src="${book.cover_url || '/images/default-cover.png'}" alt="Book Cover" class="book-cover">
+                        </a>
                     `;
                     bookGrid.appendChild(div);
                 });
