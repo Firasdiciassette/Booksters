@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: book-dao.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: book-dao.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const sqlite3 = require('sqlite3').verbose();
+/**
+ * DAO per gestire i libri nel database SQLite.
+ */
+class BookDAO {
+    constructor(db){
+        this.db = db;
+    }
+
+    /*createBooks() {   
+        return new Promise((resolve, reject) => {
+            const sql = `
+                CREATE TABLE IF NOT EXISTS books (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    author TEXT NOT NULL,
+                    genre TEXT,
+                    description TEXT,
+                    cover_url TEXT,
+                    added_by INTEGER,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (added_by) REFERENCES users(id)
+                )
+            `;
+            this.db.run(sql, function(err) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(true);
+            });
+        });
+    }*/
+
+     /**
+     * Aggiunge un libro al database.
+     * @param {string} title - Titolo del libro.
+     * @param {string} author - Autore del libro.
+     * @param {string} genre - Genere del libro.
+     * @param {string} description - Descrizione breve.
+     * @param {string} coverUrl - URL dell'immagine di copertina.
+     * @param {number} addedBy - ID dell’utente che ha aggiunto il libro.
+     * @returns {Promise&lt;{id: number}>} L'ID del libro inserito.
+     */
+    addBook(title, author, genre, description, coverUrl, addedBy) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                INSERT INTO books (title, author, genre, description, cover_url, added_by)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+            const bookParams = [title, author, genre, description, coverUrl, addedBy];
+
+            this.db.run(sql, bookParams, function(err) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve({id: this.lastID}); 
+            });
+        });
+    }
+     /** also known as: addBookOfTheMonth
+     * Aggiunge un libro del mese (solo admin).
+     * @param {number} id - ID del libro da aggiungere.
+     * @returns {Promise&lt;{id: number}>} L'ID del record nella tabella booksOfTheMonth.
+     */
+    addBookByAdmin(id){
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO booksOfTheMonth (book_id) values (?)`;
+            this.db.run(sql, [id], function(err) {
+                if(err) {
+                    return reject(err);
+                }
+                resolve({id: this.lastID});
+            });
+        });
+    }
+    /**
+     * Inserisce un libro nella libreria privata dell’utente.
+     * @param {number} userId - ID dell’utente.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise&lt;{id: number}>} L'ID del record inserito.
+     */
+    insertBookByUser(userId, bookId) {
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO user_books (user_id, book_id) VALUES (?, ?)`;
+            this.db.run(sql, [userId, bookId], function(err) {
+                if (err) return reject(err);
+                resolve({ id: this.lastID });
+            });
+        });
+    }
+    /**
+     * Restituisce tutti i libri nel database.
+     * @returns {Promise&lt;Array>} Lista di tutti i libri.
+     */
+    getAllBooks() {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM books';
+            this.db.all(sql, [], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+    /**
+     * Restituisce tutti i libri del mese.
+     * @returns {Promise&lt;Array>} Lista dei libri selezionati come Book of the Month.
+     */
+    getBooksOfTheMonth() {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT b.*
+                FROM booksOfTheMonth botm
+                JOIN books b ON botm.book_id = b.id
+        `;
+            this.db.all(sql, [], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+    /**
+     * Restituisce un libro del mese tramite ID.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise&lt;Object>} Dettagli del libro del mese.
+     */
+    getBookOfTheMonthById(bookId) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT b.*
+                FROM booksOfTheMonth botm
+                JOIN books b ON botm.book_id = b.id
+                WHERE botm.book_id = ?
+            `;
+            this.db.get(sql, [bookId], (err, row) => {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+    }   
+    /**
+     * Cerca un libro nel database tramite titolo e autore.
+     * @param {string} title - Titolo del libro.
+     * @param {string} author - Autore del libro.
+     * @returns {Promise&lt;Object|null>} Il libro trovato, o null se non esiste.
+     */
+    getBookByTitleAndAuthor(title, author) {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM books WHERE title = ? AND author = ?';
+            this.db.get(sql, [title, author], (err, row) => {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+    }
+     /**
+     * Trova un libro tramite il suo ID.
+     * @param {number} id - ID del libro.
+     * @returns {Promise&lt;Object>} Dettagli del libro.
+     */
+    getBookById(id) {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM books WHERE id = ?';
+            this.db.get(sql, [id], (err, row) => {
+                if (err) return reject(err);
+                resolve(row);
+            });
+        });
+    }
+    /**
+     * Verifica se un utente ha già aggiunto un certo libro.
+     * @param {number} bookId - ID del libro.
+     * @param {number} userId - ID dell’utente.
+     * @returns {Promise&lt;Object|null>} Il record trovato o null.
+     */
+    getBookAddedByUser(bookId, userId) {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM user_books WHERE user_id = ? AND book_id = ?';
+            this.db.get(sql, [userId, bookId], (err, row) => {
+                if(err) return reject(err);
+                resolve(row)
+            });
+        });
+    }
+    /**
+     * Restituisce tutti i libri presenti nella libreria di un utente.
+     * @param {number} userId - ID dell’utente.
+     * @returns {Promise&lt;Array>} Lista dei libri aggiunti dall’utente.
+     */
+    getBooksByUser(userId) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT books.*
+                FROM books
+                INNER JOIN user_books ON books.id = user_books.book_id
+                WHERE user_books.user_id = ?
+            `;
+            this.db.all(sql, [userId], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+
+    // For search REST api
+     /**
+     * Cerca libri tramite il titolo (usato nella search bar).
+     * @param {string} title - Titolo da cercare (anche parziale).
+     * @returns {Promise&lt;Array>} Libri trovati.
+     */
+    searchBooks(title) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT id, title, author, genre, description, cover_url FROM books
+                WHERE title LIKE ?
+            `;
+            this.db.all(sql, [`%${title}%`], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    deleteBook(id) {
+        return new Promise((resolve, reject) => {
+            const sql = 'DELETE FROM books WHERE id = ?';
+            this.db.run(sql, [id], function(err) {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+     /**
+     * Rimuove un libro dalla libreria personale dell’utente.
+     * @param {number} userId - ID dell’utente.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise&lt;void>}
+     */
+    deleteBookFromUserLibrary(userId, bookId) {
+        return new Promise((resolve, reject) => {
+            const sql = 'DELETE FROM user_books WHERE user_id = ? AND book_id = ?';
+            this.db.run(sql, [userId, bookId], function(err) {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+     /**
+     * Rimuove un libro dalla vetrina “Books of the Month”.
+     * @param {number} id - ID del libro.
+     * @returns {Promise&lt;void>}
+     */
+    deleteBookAdmin(id) {
+        return new Promise((resolve, reject) => {
+            const sqlDeleteFromBooksOfTheMonth = 'DELETE FROM booksOfTheMonth WHERE book_id = ?';
+            this.db.run(sqlDeleteFromBooksOfTheMonth, [id], (err) => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+    }
+
+
+}
+
+module.exports = BookDAO;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BookDAO.html">BookDAO</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 03 2025 10:39:01 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

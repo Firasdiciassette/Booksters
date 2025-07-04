@@ -22,13 +22,10 @@
       }
     ));
     
-// !!! sessions
-
-  passport.serializeUser((user, done) => done(null, user.id)); // stores the user ID in the session
-  passport.deserializeUser(async(id, done) => { // deserializeUser: 
-  // retrieves full user (including role) via userDAO.findUserById(id)
+  passport.serializeUser((user, done) => done(null, user.id));
+  passport.deserializeUser(async(id, done) => { 
     try {
-      const user = await userDAO.findUserById(id); // also returns the role
+      const user = await userDAO.findUserById(id); 
       done(null, user);
     } catch {
       done(err);

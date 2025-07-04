@@ -1,4 +1,4 @@
-// public/js/search.js
+// public/js/search-books.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const search = document.getElementById('search-title');

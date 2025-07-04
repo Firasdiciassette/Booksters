@@ -1,8 +1,5 @@
 // /routes/mainRoutes.js
-// General/Public Site Routes*
-// Manages routes unrelated to authentication.
-// Typically includes homepage, dashboard, or public info pages.
-// Should **not** include any login/register/logout logic.
+// Questo file gestisce le route principali dell'applicazione
 const express = require('express');
 const router = express.Router();
 const BookDAO = require('../dao/book-dao');
@@ -13,33 +10,63 @@ const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const bookDAO = new BookDAO(db);
 const reviewDAO = new ReviewDAO(db);
 
-// Home page
+/**
+ * @swagger
+ * tags:
+ *   name: MainRoutes
+ *   description: API for books, reviews, profile, and homepage
+ */
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Homepage
+ *     tags: [MainRoutes]
+ *     description: Shows all books, books of the month and recent reviews
+ *     responses:
+ *       200:
+ *         description: Homepage rendered successfully
+ */
 router.get('/', async (req, res) => {
     try {
         const botM = await bookDAO.getBooksOfTheMonth();
         const books = await bookDAO.getAllBooks();
-        const reviews = await reviewDAO.getRecentReviews(5);
-        res.render('index', {
+        const reviews = await reviewDAO.getRecentReviews(15);
+        res.render('index', {   
             books,
             botM,
             reviews,
             user: req.session.user
         });
     } catch (err) {
-        console.log('Flash error: ', req.flash('error_msg'));
         console.error('Error loading books:', err);
         req.flash('error_msg', 'Failed to load books.');
         res.redirect('/');
     }
 });
 
-// My profile route
+
+/**
+ * @swagger
+ * /profile:
+ *   get:
+ *     summary: User profile
+ *     tags: [MainRoutes]
+ *     description: Displays books added by the logged-in user
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile page with user's books
+ *       401:
+ *         description: Unauthorized - user not logged in
+ */
 router.get('/profile', isAuthenticated, async (req, res) =>{
     const userId = req.user.id;
     const bookDAO = req.app.locals.bookDAO;
     try {
         const books = await bookDAO.getBooksByUser(userId);
-        //console.log('Books for user:', books);
         res.render('profile', { 
             books: books,
              user: req.user });
@@ -50,10 +77,28 @@ router.get('/profile', isAuthenticated, async (req, res) =>{
     }
 }); 
 
-/* Book details page route */
+/**
+ * @swagger
+ * /books/{id}:
+ *   get:
+ *     summary: Book details
+ *     tags: [MainRoutes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the book
+ *     responses:
+ *       200:
+ *         description: Book details page
+ *       404:
+ *         description: Book not found
+ */
+
 router.get('/books/:id', async (req, res) => {
     const bookId = req.params.id;
-    //console.log('Requested book ID:', bookId);
 
     try {
         const book = await bookDAO.getBookById(bookId);
@@ -76,13 +121,33 @@ router.get('/books/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /books/delete:
+ *   post:
+ *     summary: Remove a book from user's library
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               bookId:
+ *                 type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect to profile page
+ */
+
 router.post('/books/delete', isAuthenticated, async (req, res) => {
     const bookId = req.body.bookId;
     const userId = req.session.user.id;
-
     try {
         await bookDAO.deleteBookFromUserLibrary(userId, bookId);
-        await bookDAO.deleteBook(bookId);
         req.flash('success_msg', 'Book removed from your library.');
         res.redirect('/profile');
     } catch (err) {
@@ -92,7 +157,37 @@ router.post('/books/delete', isAuthenticated, async (req, res) => {
     }
 });
 
-// Post req for 'generic' book addition
+
+/**
+ * @swagger
+ * /books/add:
+ *   post:
+ *     summary: Add a custom book to user's library
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               genre:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               cover_url:
+ *                 type: string
+ *     responses:
+ *       302:
+ *         description: Redirect to profile
+ */
+
 router.post('/books/add', isAuthenticated, async (req, res) => {
     const { title, author, genre, description, cover_url } = req.body;
     const addedBy = req.user.id;
@@ -111,9 +206,30 @@ router.post('/books/add', isAuthenticated, async (req, res) => {
     }
 });
 
-// botm book adding
+/**
+ * @swagger
+ * /library/add:
+ *   post:
+ *     summary: Add a Book of the Month to user's library
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               bookId:
+ *                 type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect to profile or homepage
+ */
+
 router.post('/library/add', isAuthenticated, async (req, res) => {
-    let { bookId } = req.body;
+    let { bookId } = req.body;  
     const userId = req.user.id;
     try {
         const botmBook = await bookDAO.getBookOfTheMonthById(bookId);
@@ -151,13 +267,50 @@ router.post('/library/add', isAuthenticated, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /booksOfTheMonth/add:
+ *   post:
+ *     summary: Admin - Add Book of the Month
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               genre:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               cover_url:
+ *                 type: string
+ *     responses:
+ *       302:
+ *         description: Redirect after adding book
+ */
 
-// admin botm adding
 router.post('/booksOfTheMonth/add', isAdmin, async (req, res) => {
     const { title, author, genre, description, cover_url } = req.body;
 
     try {
-        const { id: bookId } = await bookDAO.addBook(title, author, genre, description, cover_url);
+        let book = await bookDAO.getBookByTitleAndAuthor(title, author);
+        let bookId;
+
+        if (book) {
+            bookId = book.id;
+        } else {
+            const result = await bookDAO.addBook(title, author, genre, description, cover_url);
+            bookId = result.id;
+        }
+
         try {
             await bookDAO.addBookByAdmin(bookId);
             req.flash('success_msg', 'Book of the Month added successfully!');
@@ -165,9 +318,10 @@ router.post('/booksOfTheMonth/add', isAdmin, async (req, res) => {
             if (err.message.includes('UNIQUE constraint failed')) {
                 req.flash('error_msg', 'Book of The Month already exists.');
             } else {
-                throw err; 
+                throw err;
             }
         }
+
         res.redirect('/profile');
     } catch (err) {
         console.error('Unexpected error:', err);
@@ -176,11 +330,29 @@ router.post('/booksOfTheMonth/add', isAdmin, async (req, res) => {
     }
 });
 
-
-// BotM deletion route
+/**
+ * @swagger
+ * /booksOfTheMonth/delete:
+ *   post:
+ *     summary: Admin - Remove Book of the Month
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               bookId:
+ *                 type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect after deletion
+ */
 router.post('/booksOfTheMonth/delete', isAdmin, async (req, res) => {
     const bookId = parseInt(req.body.bookId);
-    console.log("Book to be erased: ", bookId);
     try {
         
         await bookDAO.deleteBookAdmin(bookId);
@@ -193,7 +365,32 @@ router.post('/booksOfTheMonth/delete', isAdmin, async (req, res) => {
     }
 });
 
-// Review books
+/**
+ * @swagger
+ * /books/review:
+ *   post:
+ *     summary: Add a review to a book
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *               rating:
+ *                 type: integer
+ *               book_id:
+ *                 type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect back to book detail
+ */
+
 router.post('/books/review', isAuthenticated, async( req, res) => {
     const { content, rating, book_id } = req.body;
     const userId = req.user.id;
@@ -207,6 +404,47 @@ router.post('/books/review', isAuthenticated, async( req, res) => {
     }
     res.redirect(`/books/${book_id}`);
 });
+
+/**
+ * @swagger
+ * /reviews/delete:
+ *   post:
+ *     summary: Admin - Delete a review
+ *     tags: [MainRoutes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reviewId:
+ *                 type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect to homepage after deletion
+ */
+
+router.post('/reviews/delete', isAdmin, async (req, res) => {
+  const { reviewId } = req.body;
+  try {
+    await reviewDAO.deleteReview(reviewId);
+    req.flash('success_msg', 'Review deleted');
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Could not delete review');
+    res.redirect('/');
+  }
+}); 
+
+// Pagina statica About
+router.get('/about', (req, res) => {
+  res.render('about', { user: req.session.user });
+});
+
 
 
 module.exports = router;

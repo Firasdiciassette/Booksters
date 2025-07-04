@@ -1,91 +1,119 @@
-<!DOCTYPE html>
-<html lang="en-US">
-    <body>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/css/style.css">
-        <title>Booksters | Because We Are Book Lovers</title>
-    </head>
-    <div class="nav-items">
-      <a href="/">
-        <img src="/images/booksters-logo.png" alt="Booksters Logo">  
-      </a>
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="#About">About</a></li>
-        </ul>
-        <input type="text" id="search-title" placeholder="Search by title...">
-        
-        <% if (user) { %>
-            <p><%= user.username %></p>
-            <% if (user.role === 'admin') { %>
-              <a href="/profile">Admin Dashboard</a>
+  <!DOCTYPE html>
+  <html lang="en-US">
+      <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link rel="stylesheet" href="/css/style.css">
+          <link rel="stylesheet" href="/css/form-validation-style.css">
+          <title>Booksters | Because We Are Book Lovers</title>
+      </head>
+      <body>
+      <div class="nav-items">
+        <a href="/">
+          <img src="/images/booksters-logo.png" alt="Booksters Logo">  
+        </a>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+          </ul>
+          <input type="text" id="search-title" placeholder="Search by title...">
+          
+          <% if (user) { %>
+              <p><%= user.username %></p>
+              <% if (user.role === 'admin') { %>
+                <a href="/profile">Admin Dashboard</a>
+              <% } else { %>
+                <a href="/profile">My Library</a>
+              <% } %>
+              <a href="/logout">Logout</a>
             <% } else { %>
-              <a href="/profile">My Library</a>
+              <a href="/login">Login</a>
+              <a href="/register">Register</a>
+              <% } %>
+      </div>
+            <% if (success_msg) { %>
+              <div class="flash-success"><%= success_msg %></div>
             <% } %>
-            <a href="/logout">Logout</a>
-          <% } else { %>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
+            <% if (error_msg) { %>
+              <div class="flash-error"><%= error_msg %></div>
             <% } %>
-    </div>
-          <% if (success_msg) { %>
-            <div class="flash-success"><%= success_msg %></div>
-          <% } %>
-          <% if (error_msg) { %>
-            <div class="flash-error"><%= error_msg %></div>
-          <% } %>
-          <div id="search-results"></div>
-    <!-- Adding 'generic' book -->
-    <div class = "search-box">
-    <% if (user && user.role === 'user') { %>
-    <form action="/books/add" method="POST">
+            <div id="search-results"></div>
+      <!-- Adding 'generic' book -->
+      <div class = "search-box">
+      <% if (user && user.role === 'user') { %>
+        <form id="book-form" action="/books/add" method="POST">
         <fieldset>
-            <legend>Add a New Book</legend>
-            <input type="text" name="title" placeholder="Book title" required>
-            <input type="text" name="author" placeholder="Book author" required>
-            <input type="text" name="genre" placeholder="Book genre">
-            <input type="text" name="cover_url" placeholder="Book cover">
-            <textarea name="description" placeholder="Add a short description"></textarea>
-            <button type="submit">Add Book</button>
-          </fieldset>
+          <legend>Add a New Book</legend>
+          
+          <div class="input-control">
+              <input type="text" id="book-title" name="title" placeholder="Book title">
+              <div class="error"></div>
+          </div>
+          
+          <div class="input-control">
+              <input type="text" id="book-author" name="author" placeholder="Book author">
+              <div class="error"></div>
+          </div>
+          
+          <div class="input-control">
+              <input type="text" id="book-genre" name="genre" placeholder="Book genre">
+              <div class="error"></div>
+          </div>
+          <div class="input-control">
+              <input type="text" id="book-cover" name="cover_url" placeholder="Book cover">
+              <div class="error"></div>
+          </div>
+          <div class="input-control">
+              <textarea id="book-description" name="description" placeholder="Add a short description"></textarea>
+              <div class="error"></div>
+          </div>
+          
+          <button type="submit">Add Book</button>
+      </fieldset>
     </form>
+
+      <% } %>
+      <!-- Adding book of the month -->
+    <% if (user && user.role === 'admin') { %>
+          <form action="/booksOfTheMonth/add" method="POST">
+            <fieldset>
+              <legend>Add a New Book Of The Month</legend>
+              <input type="text" name="title" placeholder="Book title" required>
+              <input type="text" name="author" placeholder="Book author" required>
+              <input type="text" name="genre" placeholder="Book genre">
+              <input type="text" name="cover_url" placeholder="Book cover">
+              <textarea name="description" placeholder="Add a short description"></textarea>
+              <button type="submit">Add Book of the Month</button>
+            </fieldset>
+          </form>
+          </div>
     <% } %>
-    <!-- Adding book of the month -->
-   <% if (user && user.role === 'admin') { %>
-        <form action="/booksOfTheMonth/add" method="POST">
-          <fieldset>
-            <legend>Add a New Book Of The Month</legend>
-            <input type="text" name="title" placeholder="Book title" required>
-            <input type="text" name="author" placeholder="Book author" required>
-            <input type="text" name="genre" placeholder="Book genre">
-            <input type="text" name="cover_url" placeholder="Book cover">
-            <textarea name="description" placeholder="Add a short description"></textarea>
-            <button type="submit">Add Book of the Month</button>
-          </fieldset>
-        </form>
-        </div>
-   <% } %>
-    <!-- 'dynamic' Books List -->
-    <div class="book-grid">
-      <% if (books && books.length > 0) %>
-        <% books.forEach(book => { %>
-            <div class="book-card">
-                <h3><%= book.title %></h3>
-                <p><strong>Author:</strong> <%= book.author %></p>
-                <p><strong>Genre:</strong> <%= book.genre %></p>
-                <p><%= book.description %></p>
-                <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
-                <form action="/books/delete" method="POST">
-                  <input type="hidden" name="bookId" value="<%= book.id %>">
-                  <button type="submit">Remove Book</button>
-                </form>
-              </div>
-        <% }) %>
-    
-        
-    </div>
-    <script src="/javascripts/search-books.js"></script>
-    </body>
-</html>
+      <!-- 'dynamic' Books List -->
+      <div class="book-grid">
+        <% if (books && books.length > 0) { %>
+          <% books.forEach(book => { %>
+              <div class="book-card">
+                  <h3><%= book.title %></h3>
+                  <p><strong>Author:</strong> <%= book.author %></p>
+                  <p><strong>Genre:</strong> <%= book.genre %></p>
+                  <p><%= book.description %></p>
+                  <a href="/books/<%= book.id %>">
+                    <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
+                  </a>
+                    <form action="/books/delete" method="POST">
+                    <input type="hidden" name="bookId" value="<%= book.id %>">
+                    <button type="submit">Remove Book</button>
+                  </form>
+                </div>
+          <% }) %>
+      <% } else { %>
+        <% if (user && user.role === 'user') { %>
+          <p>No books added to your library yet.</p>
+          <% } %>
+      <% } %>
+          
+      </div>
+      <script src="/javascripts/search-books.js" defer></script>
+      <script src="/javascripts/book-validation.js" defer></script>
+      </body>
+  </html>

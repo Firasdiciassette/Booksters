@@ -16,6 +16,8 @@ const ReviewDAO = require('./dao/review-dao');
 const authRoutes = require('./routes/authRoutes');
 const mainRoutes = require('./routes/mainRoutes');
 const bookSearchApi = require('./routes/api/bookSearch');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -23,6 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/api', bookSearchApi);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const userDAO = new UserDAO(db);
 const bookDAO = new BookDAO(db);
@@ -32,24 +35,13 @@ app.locals.userDAO = userDAO;
 app.locals.bookDAO = bookDAO;
 app.locals.reviewDAO = reviewDAO;
 
-/*app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
-app.post('/register', (req, res) => {
-  console.log('Global handler hit directly');
-  res.send('ping');
-});*/
-
-
 app.use(session({
   store: new (require('connect-sqlite3')(session))({ db: './booksters.db' }),
   name: 'usersession',
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 3600000 } // Cookies will last for one hour
+  cookie: { maxAge: 3600000 }
 }));
 
 app.use((req, res, next) => {
@@ -66,13 +58,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// This makes sure the flash messages and the user req body are passed globally to all views.
+// This make sure the flash messages and the user req body are passed globally to all views.
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
   res.locals.user = req.user;
-  //console.log(req.user);
   next();
 });
 

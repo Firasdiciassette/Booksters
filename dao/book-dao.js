@@ -1,5 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
-
+/**
+ * DAO per gestire i libri nel database SQLite.
+ */
 class BookDAO {
     constructor(db){
         this.db = db;
@@ -29,7 +31,16 @@ class BookDAO {
         });
     }*/
 
-
+     /**
+     * Aggiunge un libro al database.
+     * @param {string} title - Titolo del libro.
+     * @param {string} author - Autore del libro.
+     * @param {string} genre - Genere del libro.
+     * @param {string} description - Descrizione breve.
+     * @param {string} coverUrl - URL dell'immagine di copertina.
+     * @param {number} addedBy - ID dell’utente che ha aggiunto il libro.
+     * @returns {Promise<{id: number}>} L'ID del libro inserito.
+     */
     addBook(title, author, genre, description, coverUrl, addedBy) {
         return new Promise((resolve, reject) => {
             const sql = `
@@ -46,7 +57,11 @@ class BookDAO {
             });
         });
     }
-    // also known as: addBookOfTheMonth
+     /** also known as: addBookOfTheMonth
+     * Aggiunge un libro del mese (solo admin).
+     * @param {number} id - ID del libro da aggiungere.
+     * @returns {Promise<{id: number}>} L'ID del record nella tabella booksOfTheMonth.
+     */
     addBookByAdmin(id){
         return new Promise((resolve, reject) => {
             const sql = `INSERT INTO booksOfTheMonth (book_id) values (?)`;
@@ -58,7 +73,12 @@ class BookDAO {
             });
         });
     }
-
+    /**
+     * Inserisce un libro nella libreria privata dell’utente.
+     * @param {number} userId - ID dell’utente.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise<{id: number}>} L'ID del record inserito.
+     */
     insertBookByUser(userId, bookId) {
         return new Promise((resolve, reject) => {
             const sql = `INSERT INTO user_books (user_id, book_id) VALUES (?, ?)`;
@@ -68,7 +88,10 @@ class BookDAO {
             });
         });
     }
-
+    /**
+     * Restituisce tutti i libri nel database.
+     * @returns {Promise<Array>} Lista di tutti i libri.
+     */
     getAllBooks() {
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM books';
@@ -78,7 +101,10 @@ class BookDAO {
             });
         });
     }
-
+    /**
+     * Restituisce tutti i libri del mese.
+     * @returns {Promise<Array>} Lista dei libri selezionati come Book of the Month.
+     */
     getBooksOfTheMonth() {
         return new Promise((resolve, reject) => {
             const sql = `
@@ -92,21 +118,31 @@ class BookDAO {
             });
         });
     }
-
-    getBookOfTheMonthById(id) {
+    /**
+     * Restituisce un libro del mese tramite ID.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise<Object>} Dettagli del libro del mese.
+     */
+    getBookOfTheMonthById(bookId) {
         return new Promise((resolve, reject) => {
-        const sql = `SELECT b.*
-            FROM booksOfTheMonth botm
-            JOIN books b ON botm.book_id = b.id
-            WHERE botm.id = ?
-        `;
-        this.db.get(sql, [id], (err, row) => {
-            if (err) return reject(err);
-            resolve(row);
+            const sql = `
+                SELECT b.*
+                FROM booksOfTheMonth botm
+                JOIN books b ON botm.book_id = b.id
+                WHERE botm.book_id = ?
+            `;
+            this.db.get(sql, [bookId], (err, row) => {
+                if (err) return reject(err);
+                resolve(row);
+            });
         });
-    });
-}
-    
+    }   
+    /**
+     * Cerca un libro nel database tramite titolo e autore.
+     * @param {string} title - Titolo del libro.
+     * @param {string} author - Autore del libro.
+     * @returns {Promise<Object|null>} Il libro trovato, o null se non esiste.
+     */
     getBookByTitleAndAuthor(title, author) {
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM books WHERE title = ? AND author = ?';
@@ -116,7 +152,11 @@ class BookDAO {
             });
         });
     }
-
+     /**
+     * Trova un libro tramite il suo ID.
+     * @param {number} id - ID del libro.
+     * @returns {Promise<Object>} Dettagli del libro.
+     */
     getBookById(id) {
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM books WHERE id = ?';
@@ -126,7 +166,12 @@ class BookDAO {
             });
         });
     }
-
+    /**
+     * Verifica se un utente ha già aggiunto un certo libro.
+     * @param {number} bookId - ID del libro.
+     * @param {number} userId - ID dell’utente.
+     * @returns {Promise<Object|null>} Il record trovato o null.
+     */
     getBookAddedByUser(bookId, userId) {
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM user_books WHERE user_id = ? AND book_id = ?';
@@ -136,28 +181,37 @@ class BookDAO {
             });
         });
     }
-
+    /**
+     * Restituisce tutti i libri presenti nella libreria di un utente.
+     * @param {number} userId - ID dell’utente.
+     * @returns {Promise<Array>} Lista dei libri aggiunti dall’utente.
+     */
     getBooksByUser(userId) {
         return new Promise((resolve, reject) => {
             const sql = `
-                SELECT DISTINCT books.*
+                SELECT books.*
                 FROM books
-                LEFT JOIN user_books ON books.id = user_books.book_id
+                INNER JOIN user_books ON books.id = user_books.book_id
                 WHERE user_books.user_id = ?
-                   OR books.added_by = ?
             `;
-            this.db.all(sql, [userId, userId], (err, rows) => {
+            this.db.all(sql, [userId], (err, rows) => {
                 if (err) return reject(err);
                 resolve(rows);
             });
         });
     }
 
+
     // For search REST api
+     /**
+     * Cerca libri tramite il titolo (usato nella search bar).
+     * @param {string} title - Titolo da cercare (anche parziale).
+     * @returns {Promise<Array>} Libri trovati.
+     */
     searchBooks(title) {
         return new Promise((resolve, reject) => {
             const sql = `
-                SELECT title, author, genre, description, cover_url FROM books
+                SELECT id, title, author, genre, description, cover_url FROM books
                 WHERE title LIKE ?
             `;
             this.db.all(sql, [`%${title}%`], (err, rows) => {
@@ -176,7 +230,12 @@ class BookDAO {
             });
         });
     }
-
+     /**
+     * Rimuove un libro dalla libreria personale dell’utente.
+     * @param {number} userId - ID dell’utente.
+     * @param {number} bookId - ID del libro.
+     * @returns {Promise<void>}
+     */
     deleteBookFromUserLibrary(userId, bookId) {
         return new Promise((resolve, reject) => {
             const sql = 'DELETE FROM user_books WHERE user_id = ? AND book_id = ?';
@@ -186,7 +245,11 @@ class BookDAO {
             });
         });
     }
-
+     /**
+     * Rimuove un libro dalla vetrina “Books of the Month”.
+     * @param {number} id - ID del libro.
+     * @returns {Promise<void>}
+     */
     deleteBookAdmin(id) {
         return new Promise((resolve, reject) => {
             const sqlDeleteFromBooksOfTheMonth = 'DELETE FROM booksOfTheMonth WHERE book_id = ?';

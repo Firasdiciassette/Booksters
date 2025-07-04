@@ -1,0 +1,45 @@
+
+/* form validation */
+
+.input-control {
+    margin-bottom: 15px;    
+    position: relative; 
+}
+
+.error {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 4px;
+    display: block;
+}
+
+.input-control.success input,
+.input-control.success textarea {
+    border: 2px solid green;
+}
+.input-control.error input,
+.input-control.error textarea {
+    border: 2px solid red;
+}
+
+
+.flash {
+    margin: 10px auto;
+    padding: 20px;
+    border-left: 5px solid;
+    width: 40%;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  
+  .flash-success {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+  }
+  
+  .flash-error {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+  }

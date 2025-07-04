@@ -6,20 +6,23 @@
       <meta name="description" content="Booksters is a free, ad-less, instant e-library where you can discover, share, and review countless books."> 
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="/css/style.css">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gothic&display=swap" rel="stylesheet">
       <title>Booksters | Your Planet of Books</title>
     </head>
     <body>
-
+      <!-- Navbar -->
       <div class="nav-items">
         <a href="/">
           <img src="/images/booksters-logo.png" alt="Booksters Logo">  
         </a>
         <ul>
           <li><a href="/">Home</a></li>
-          <li><a href="#About">About</a></li>
+          <li><a href="/about">About</a></li>
         </ul>
         <input type="text" id="search-title" placeholder="Search by title">
-        
+        <!-- Dynamic user rendering -->
         <% if (user) { %>
           <p>Welcome, <%= user.username %>!</p>
           <% if (user.role === 'admin') { %>
@@ -50,68 +53,77 @@
       <div class="home-image"> 
         <img src="/images/home-bg.jpg" alt="Bookshelves background"> 
         <h1>Welcome to Booksters</h1>
-        <h3>Your pocket library</h3>
+        <h3>Your Planet of Books</h3>
       </div>
     <!-- Books of the month vetrina -->
+    <div class="home-image-2">
+      
+      <h1>Books of the Month</h1>
+      <h2>Discover Booksters' monthly picks</h2>
+
       <div class="vetrina">
-        <h2>Books of the Month</h2>
-          <div class="book-grid">
-            <% botM.forEach(book => { %>
-              <div class="book-card">
-                <h3><%= book.title %></h3>
-                <p><strong>Author:</strong> <%= book.author %></p>
-                <p><strong>Genre:</strong> <%= book.genre %></p>
-                <p><%= book.description %></p>
-                <a href="/books/<%= book.id %>">
-                  <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
-                </a>
-             
+        <div class="book-grid">
+          <% botM.forEach(book => { %>
+            <div class="book-card">
+              <h3><%= book.title %></h3>
+              <p><strong>Author:</strong> <%= book.author %></p>
+              <p><strong>Genre:</strong> <%= book.genre %></p>
+              <p><%= book.description %></p>
+              <a href="/books/<%= book.id %>">
+                <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
+              </a>
+              <% if (user && user.role === 'user') {  %>
                 <form action="/library/add" method="post">
                   <input type="hidden" name="bookId" value="<%= book.id %>">
                   <button type="submit">Want to read</button>
                 </form>
-                
-                <% if (user && user.role === 'admin') { %>
-                  <form action="/booksOfTheMonth/delete" method="POST">
+              <% } %>
+              <% if (user && user.role === 'admin') { %>
+                <form action="/booksOfTheMonth/delete" method="POST">
                   <input type="hidden" name="bookId" value="<%= book.id %>">
-                    <button type="submit">Remove book</button>
-                  </form>
-                <% } %>
-              </div>
-          <% }) %>      
-          </div>
+                  <button type="submit">Remove book</button>
+                </form>
+              <% } %>
+            </div>
+          <% }) %> 
+        </div>
       </div>
+    </div>
+
         
-      <!-- Reviews -->
-      <h2>What our users think</h2>
-      <% if (reviews && reviews.length > 0) { %>
-        <% reviews.forEach(review => { %>
-          <div class="review">
-            <p><strong><%= review.username || 'Anonymous' %>:</strong> <%= review.content %></p>
-      
-            <% if (review.rating) { %>
-              <p>Rating: <%= review.rating %>/5</p>
-            <% } %>
-      
-            <!-- Book details -->
-            <div class="reviewed-book-info">
+      <!-- Reviews --> 
+       <div class="home-image-3">
+        
+        <h2>What our users think</h2>
+          <div class="review-grid">
+            <% if (reviews && reviews.length > 0) { %>
+               <% reviews.forEach(review => { %>
+                  <div class="review-card">
+                    <p><strong><%= review.username || 'Anonymous' %>:</strong> <%= review.content %></p>
+                    <% if (review.rating) { %>
+                      <p>Rating: <%= review.rating %>/5</p>
+                    <% } %>
+                  <div class="reviewed-book-info">
               <a href="/books/<%= review.book_id %>">
-                <img src="<%= review.book_cover || '/images/default-cover.png' %>" alt="Cover of <%= review.book_title %>" width="60">
+                <img src="<%= review.book_cover || '/images/default-cover.png' %>" alt="Cover of <%= review.book_title %>" class="review-book-cover">
               </a>
               <p>
                 <strong>Book:</strong> <a href="/books/<%= review.book_id %>"><%= review.book_title %></a><br>
                 <strong>Author:</strong> <%= review.book_author %>
               </p>
             </div>
-      
-            <p><small>
+            <p>
               <%= review.created_at ? new Date(review.created_at).toLocaleString() : 'Unknown date' %>
-            </small></p>
+            </p>
           </div>
         <% }) %>
-      <% } else { %>
-        <p>No reviews yet. Be the first to write one!</p>
-      <% } %>
+      </div>
+    <% } else { %>
+      <p>No reviews yet. Be the first to write one!</p>
+    <% } %>
+    </div>
+    </div>
+
       
             
         <!-- Footer -->
@@ -121,9 +133,9 @@
           </div>
           <div class="footer-nav">
             <ul>
-              <li><a href="#Home">Home</a></li>
-              <li><a href="#MyLibrary">My Library</a></li>
-              <li><a href="#About">About</a></li>
+              <li><a href="/">Home</a></li>
+              <li><a href="/profile">My Library</a></li>
+              <li><a href="/about">About</a></li>
             </ul>
           </div>
           <div class="footer-social">

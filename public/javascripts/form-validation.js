@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', e => {
             e.preventDefault();
             if (validateRegistration()) {
-                console.log("Submitting form...");
+                console.log("Submitting form validation...");
                 registerForm.submit();
             }
         });
@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const validateLogin = () => {
-        //console.log('Validating log in ...')
         const usernameValue = username.value.trim();
         const passValue = password.value.trim();
         let isValid = true;
@@ -120,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             setSuccess(confirmPassword);
         }
-        console.log("Form validation result:", isValid); // This is overkill for privacy
+        //console.log("Form validation result:", isValid); // This is overkill for privacy
         return isValid;
     }
 

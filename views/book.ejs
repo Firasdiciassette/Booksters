@@ -46,19 +46,22 @@
 
   <!-- Book details -->
   <div class="book-details">
+  <div class="book-card single-book-card">
+    <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>" class="book-cover">
     <h2><%= book.title %></h2>
     <p><strong>Author:</strong> <%= book.author %></p>
     <p><strong>Genre:</strong> <%= book.genre %></p>
     <p><%= book.description %></p>
-    <img src="<%= book.cover_url || '/images/default-cover.png' %>" alt="Cover of <%= book.title %>">
   </div>
+  
+</div>
 
   <!-- Review Form -->
-  <% if (user) { %>
+  <% if (user && user.role === 'user') { %>
     <div class="review-form">
       <form action="/books/review" method="POST">
         <input type="hidden" name="book_id" value="<%= book.id %>">
-        <textarea name="content" placeholder="So what do you think?" required></textarea>
+        <textarea name="content" placeholder="So, what's on your mind?" required></textarea>
         
         <label for="rating">Rating (1 to 5):</label>
         <select name="rating" required>

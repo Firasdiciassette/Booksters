@@ -54,6 +54,16 @@ cursor = conn.cursor()
 #         );
 #     ''')
 
+
+# cursor.execute("""
+#    CREATE TABLE IF NOT EXISTS booksOfTheMonth (
+#        id INTEGER PRIMARY KEY AUTOINCREMENT,
+#        book_id INTEGER NOT NULL,
+#        FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE
+#        UNIQUE(id)
+#    );
+# """)
+
 # cursor.execute("DROP TABLE sessions")
 # cursor.execute("DROP TABLE users")
 # cursor.execute("DROP TABLE booksOfTheMonth")
@@ -71,16 +81,6 @@ cursor = conn.cursor()
 # cursor.execute("SELECT * FROM books")
 # cursor.execute("SELECT * FROM user_books")
 # cursor.execute("SELECT * FROM reviews")
-# cursor.execute('''
-#     SELECT books.*
-#     FROM books
-#     INNER JOIN user_books on books.id = user_books.book_id
-#     WHERE user_books.user_id = ?
-#     ''', 1)
-
-
-
-# print('Books for user:', books)
 
 print(cursor.fetchall())
 conn.commit()
