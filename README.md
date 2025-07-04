@@ -19,13 +19,16 @@ Le tabelle sono:
 | Ruolo        | Username | Password  | Permessi principali                              |
 |--------------|----------|-----------|-------------------------------------------------|
 | Admin        | admin    | admin789  | Gestione libri del mese (aggiungi, cancella)    |
-| Utente (user)| firas    | firas789  | Cerca libri, aggiungi libri alla libreria, scrivi recensioni |
-| Utente (user)| marco    | marco789  | Come sopra                                       |
-| Utente (user)| anna     | anna789   | Come sopra                                       |
+| Utente | firas    | firas789  | Cerca libri, aggiungi libri alla libreria, scrivi recensioni |
+| Utente | marco    | marco789  | Come sopra                                       |
+| Utente | anna     | anna789   | Come sopra                                       |
 
 ## Come avviare l’applicazione
 
-1. Clona il repository  
+1. Clona il repository
+```
+git clone https://github.com/Firasdiciassette/Booksters.git
+```
 2. Installa le dipendenze con:  
  ```bash
  npm install
